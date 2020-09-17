@@ -1,0 +1,48 @@
+h1{
+  text-align:center;
+  line-height: 20%;
+  width:auto;
+  padding-bottom: 5%
+}
+body{
+  background-color: #dbcbab;
+}
+img{
+  width:100%;
+  margin-left:auto;
+  line-height: 50%;
+}
+#searchBar{
+  line-height:40%;
+  width: 15%;
+
+}
+divSearchBoxes {
+  width: 25%;
+  height: 25%;
+}
+p1{
+  padding-right: 2%;
+}
+p2{
+  padding-left: 2%;
+}
+left{
+  padding-top: 15%;
+  float:left;
+  align: center;
+  position: relative;
+  left:25%;
+  margin-left: auto%;
+  width:100%;
+  height: 100px;
+}
+right{
+  float:left;
+  align: center;
+  position: relative;
+  left:25%;
+  margin-left: auto%;
+  width:100%;
+  height: 100px;
+}

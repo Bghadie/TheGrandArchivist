@@ -2,10 +2,33 @@
 <html lan = "en">
 <head>
   <meta charset = "UTF-8">
+  <link rel = "stylesheet" href = "HomePageStyle.css">
   <title>Home Page</Title>
 </head>
 <body>
   <h1> The Grand Archivist</h1>
-  <p></p>
+  <p>
+    <divPic>
+      <img src ="logo.png" alt="You should see the 'logo'">
+    </divPic>
+    <divSearchBoxes>
+      <left>
+        <p1>
+          Name:
+          <input type = "text" placeholder = "Name..." id = "searchBar">
+        </p1>
+        Publisher:
+        <input type = "text" placeholder = "Publisher..." id = "searchBar">
+      </left>
+      <right>
+        Author:
+        <input type = "text" placeholder = "Author..." id = "searchBar" class ="rightSide">
+        <p2>
+          Barcode
+          <input type = "text" placeholder = "Barcode..." id = "searchBar" class ="rightSide">
+        </p2>
+      </right>
+    </divSearchBoxes>
+  </p>
 </body>
 </html>
