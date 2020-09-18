@@ -1,35 +1,39 @@
 <!DOCTYPE html>
 <html lan = "en">
-<head>
-  <meta charset = "UTF-8">
-  <link rel = "stylesheet" href = "HomePageStyle.css">
-  <title>Home Page</Title>
-</head>
-<body>
-  <h1> The Grand Archivist</h1>
-  <p>
+  <head>
+    <meta charset = "UTF-8">
+    <link rel = "stylesheet" href = "HomePageStyle.css">
+    <title>Home Page</Title>
+  </head>
+  <body>
+    <h1> The Grand Archivist</h1>
     <divPic>
       <img src ="logo.png" alt="You should see the 'logo'">
     </divPic>
-    <divSearchBoxes>
-      <left>
-        <p1>
+    <div id ="container1">
+        <nav> </nav>
+        <div id = "name">
           Name:
-          <input type = "text" placeholder = "Name..." id = "searchBar"></input>
-        </p1>
+          <input type = "text" placeholder = "Name..." id = "searchBar">
+        </div>
+        <div id = "author">
+          Author:
+          <input type = "text" placeholder = "Author..." id = "searchBar">
+        </div>
+        <aside> </aside>
+    </div>
+    <div id = "container2">
+      <nav> </nav>
+      <div id = "publisher">
         Publisher:
         <input type = "text" placeholder = "Publisher..." id = "searchBar">
-      </left>
-      <right>
-        Author:
-        <input type = "text" placeholder = "Author..." id = "searchBar" class ="rightSide">
-        <p2>
-          Barcode
-          <input type = "text" placeholder = "Barcode..." id = "searchBar" class ="rightSide">
-        </p2>
-      </right>
-      <button type = "button">Search</button>
-    </divSearchBoxes>
-  </p>
-</body>
+      </div>
+      <div id = "barcode">
+        Barcode:
+        <input type = "text" placeholder = "Barcode..." id = "searchBar">
+      </div>
+      <aside> </aside>
+    </div>
+    <button type = "button">Search</button>
+  </body>
 </html>
