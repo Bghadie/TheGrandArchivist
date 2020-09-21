@@ -1,2 +1,2 @@
-# TheGrandArchivist
-The Grand Archivist is an open source book database that uses the Open Library API
+# TheGrandCinema
+The Grand Cinea is an open source movie database.
