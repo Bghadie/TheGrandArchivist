@@ -1,0 +1,35 @@
+body{
+  background-color: #dbcbab;
+  max-width: 700px;
+  width: 95%
+  margin: 10px auto;
+}
+
+#container{
+  display:flex;
+  flex-flow: row wrap ;
+  justify-content: flex-start;
+}
+poster{
+  flex:0 1 30%;
+  height: 300px;
+  border: solid;
+}
+movieTitle{
+  flex:0 1 35%;
+  height: 20px;
+  border: solid;
+}
+releaseYear{
+  flex:0 1 30%;
+  height: 20px;
+  border: solid;
+}
+rating{
+  flex: 0 1 30%;
+  border: solid;
+}
+runTime{
+  flex: 0 1 30%;
+  border:solid;
+}
