@@ -1,7 +1,6 @@
 body{
   background-color: #dbcbab;
   width: 95%;
-  height: 1000px;
   margin: 10px auto;
 }
 poster{
@@ -90,7 +89,7 @@ reviews{
   top: 600px;
   left: 10px;
   height: 200px;
-  width: 98%;
+  width: 880px;
   border: solid;
 }
 #addReview{
@@ -105,6 +104,6 @@ similarMovies{
   top: 810px;
   left: 10px;
   height: 200px;
-  width: 98%;
+  width: 880px;
   border: solid;
 }
