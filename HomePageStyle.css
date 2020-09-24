@@ -5,9 +5,9 @@ h1{
   padding-bottom: 5%
 }
 #logIn{
-  position: absolute;
-  top:15px;
-  left: 600px;
+  display: flex;
+  float: right;
+  flex: 0 1 100%;
 }
 body{
   background-color: #dbcbab;
