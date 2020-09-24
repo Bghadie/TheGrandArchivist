@@ -99,6 +99,13 @@ reviews{
   width: 100px;
   height: 25px;
 }
+#logIn{
+  position: absolute;
+  top:15px;
+  left:690px;
+  width: 160px;
+  height: 25px;
+}
 similarMovies{
   position: absolute;
   top: 810px;
