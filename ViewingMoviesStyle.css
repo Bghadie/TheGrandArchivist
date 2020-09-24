@@ -1,35 +1,110 @@
 body{
   background-color: #dbcbab;
-  max-width: 700px;
-  width: 95%
+  width: 95%;
+  height: 1000px;
   margin: 10px auto;
 }
-
-#container{
-  display:flex;
-  flex-flow: row wrap ;
-  justify-content: flex-start;
-}
 poster{
-  flex:0 1 30%;
+  position: absolute;
+  left: 10px;
+  top: 10px;
   height: 300px;
+  width: 200px;
   border: solid;
 }
+
 movieTitle{
-  flex:0 1 35%;
-  height: 20px;
+  position: absolute;
+  top:10px;
+  left: 225px;
+  width: 220px;
+  height:30px;
   border: solid;
 }
 releaseYear{
-  flex:0 1 30%;
-  height: 20px;
+  position:absolute;
+  top:10px;
+  left: 450px;
+  width: 200px;
+  height:30px;
   border: solid;
 }
 rating{
-  flex: 0 1 30%;
+  position: absolute;
+  top:320px;
+  left:80px;
+  width: 60px;
   border: solid;
 }
 runTime{
-  flex: 0 1 30%;
-  border:solid;
+  position: absolute;
+  top:50px;
+  left: 225px;
+  width: 220px;
+  height:30px;
+  border: solid;
+
+}
+summary{
+  position: absolute;
+  top:50px;
+  left: 450px;
+  width: 420px;
+  height: 530px;
+  border: solid;
+}
+genre{
+  position: absolute;
+  top:90px;
+  left: 225px;
+  width: 220px;
+  height:30px;
+  border: solid;
+}
+director{
+  position: absolute;
+  top: 130px;
+  left: 225px;
+  width: 220px;
+  height:30px;
+  border: solid;
+}
+writers{
+  position: absolute;
+  top:170px;
+  left: 225px;
+  width: 220px;
+  height:30px;
+  border: solid;
+}
+actors{
+  position: absolute;
+  top: 210px;
+  left: 225px;
+  width: 220px;
+  height: 230px;
+  border: solid;
+}
+reviews{
+  position: absolute;
+  top: 600px;
+  left: 10px;
+  height: 200px;
+  width: 98%;
+  border: solid;
+}
+#addReview{
+  position: absolute;
+  top:570px;
+  left:10px;
+  width: 100px;
+  height: 25px;
+}
+similarMovies{
+  position: absolute;
+  top: 810px;
+  left: 10px;
+  height: 200px;
+  width: 98%;
+  border: solid;
 }
