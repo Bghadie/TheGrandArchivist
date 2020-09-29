@@ -1,0 +1,73 @@
+body{
+  background-color: #dbcbab;
+  width: 95%;
+  margin: 10px auto;
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 880px;
+}
+h1{
+  flex: 0 1 60%;
+}
+div{
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  background: white;
+  padding: 10px;
+}
+div2{
+  flex: 0 1 16%;
+}
+#logout{
+  flex: 0 1 22%;
+  margin-top: 25px;
+  height: 30px;
+  border-radius:  5px;
+
+}
+#usertype{
+  flex: 0 1 2%;
+  margin-bottom: 10px;
+}
+#breakline{
+  flex: 0 1 40%;
+}
+#recommended{
+  flex: 0 1 75%;
+  border-right: none;
+  border-bottom: none;
+}
+#usersfollowing{
+  flex: 0 1 20%;
+  border-left: none;
+  border-bottom: none;
+
+}
+#resentreviews{
+  flex: 0 1 75%;
+  border-right: none;
+  border-top: none;
+
+}
+#peoplefollowing{
+  flex: 0 1 20%;
+  border-left: none;
+  border-top: none;
+
+}
+#stopfollowing{
+  flex: 0 1 20%;
+  margin-top: 10px;
+  border-radius:  5px;
+
+}
+#logout:hover, #stopfollowing:hover{
+  background-color: RGB(237,134,150);
+}
+#logout:active, #stopfollowing:active{
+  background-color: RGB(237,134,150);
+  box-shadow: 0 2px #666;
+  transform: translateY(4px);
+}

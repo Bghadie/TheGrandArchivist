@@ -2,6 +2,7 @@ body{
   background-color: #dbcbab;
   width: 95%;
   margin: 10px auto;
+
 }
 poster{
   position: absolute;
@@ -11,7 +12,14 @@ poster{
   width: 200px;
   border: solid;
 }
-
+#logIn:hover, #addReview:hover{
+  background-color: RGB(237,134,150);
+}
+#logIn:active, #addReview:active{
+  background-color: RGB(237,134,150);
+  box-shadow: 0 2px #666;
+  transform: translateY(3px);
+}
 movieTitle{
   position: absolute;
   top:10px;
@@ -51,6 +59,8 @@ summary{
   width: 420px;
   height: 530px;
   border: solid;
+  overflow-y: scroll;
+
 }
 genre{
   position: absolute;
@@ -83,6 +93,8 @@ actors{
   width: 220px;
   height: 230px;
   border: solid;
+  overflow-y: scroll;
+
 }
 reviews{
   position: absolute;
@@ -91,13 +103,17 @@ reviews{
   height: 200px;
   width: 880px;
   border: solid;
+  overflow-y: scroll;
+
 }
 #addReview{
   position: absolute;
-  top:570px;
+  top:560px;
   left:10px;
-  width: 100px;
+  width: 150px;
   height: 25px;
+  border-radius:  5px;
+
 }
 #logIn{
   position: absolute;
@@ -105,6 +121,8 @@ reviews{
   left:690px;
   width: 160px;
   height: 25px;
+  border-radius:  5px;
+
 }
 similarMovies{
   position: absolute;

@@ -5,8 +5,8 @@ body{
   max-width: 700px;
   width: 95%
   justify-content: center;
-
   margin: 10px auto;
+  overflow: scroll;
 }
 left{
   flex: 0 1 20%;
@@ -54,6 +54,14 @@ myBtns{
   margin-top: 5px;
   padding: 20px;
   justify-content: center;
+}
+#login:hover, #createAcc:hover{
+  background-color: RGB(237,134,150);
+}
+#login:active, #createAcc:active{
+  background-color: RGB(237,134,150);
+  box-shadow: 0 2px #666;
+  transform: translateY(4px);
 }
 #login{
   background-color: lightgrey;
