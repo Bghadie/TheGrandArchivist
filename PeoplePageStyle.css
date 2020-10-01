@@ -1,0 +1,64 @@
+
+body{
+  background-color: #dbcbab;
+  width: 95%
+  margin: 10px auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+header{
+  flex: 0 1 55%;
+  background: white;
+  box-shadow: 0.5px 0.5px 0.5px 0.5px;
+  padding-left: 10px;
+  padding-bottom: 10px;
+
+}
+#forheader{
+  flex: 0 1 20%;
+}
+#forrole{
+  flex: 0 1 80%;
+}
+#logIn{
+  flex: 0 1 20%;
+  margin-top: 25px;
+  height: 30px;
+  min-width: 100px;
+  border-radius:  5px;
+}
+#role{
+  flex: 0 1 7%;
+  background: white;
+  text-align: center;
+  box-shadow: 0.5px 0.5px 0.5px 0.5px;
+  margin-bottom: 1px;
+  padding: 10px;
+}
+#container{
+  display: flex;
+  flex: 0 1 100%;
+  min-height: 400px;
+}
+#recentWork, #frequentCollabs{
+  flex: 0 1 50%;
+  text-align: center;
+  list-style: none;
+  background: white;
+  box-shadow: 3px 3px 1px;
+
+}
+li{
+  padding-bottom: 10px;
+}
+#logIn:hover{
+  background-color: RGB(237,134,150);
+}
+li:hover{
+  color: blue;
+}
+#logIn:active{
+  background-color: RGB(237,134,150);
+  box-shadow: 0 2px #666;
+  transform: translateY(4px);
+}
