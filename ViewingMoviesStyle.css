@@ -2,6 +2,7 @@ body{
   background-color: #dbcbab;
   width: 95%;
   margin: 10px auto;
+  min-height: 1100px;
 
 }
 poster{
@@ -131,4 +132,14 @@ similarMovies{
   height: 200px;
   width: 880px;
   border: solid;
+}
+p{
+  position: absolute;
+  top:1050px;
+}
+#backToSearch{
+  color: black;
+}
+#backToSearch:hover{
+  color: RGB(137,100,150);
 }

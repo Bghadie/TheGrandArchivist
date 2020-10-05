@@ -2,7 +2,7 @@
 body{
   display: flex;
   background-color: #dbcbab;
-  max-width: 700px;
+  max-width: 750px;
   width: 95%
   justify-content: center;
   margin: 10px auto;
@@ -30,6 +30,7 @@ textFields{
   flex-direction: column;
   padding: 10px;
   justify-content: center;
+
 }
 #username{
   background-color: lightgrey;
@@ -38,6 +39,7 @@ textFields{
   margin-bottom: 20px;
   font-size: 15pt;
   height: 50px;
+  padding-left: 10px;
 }
 
 #password{
@@ -45,8 +47,11 @@ textFields{
   background-color: lightgrey;
   border: none;
   border-radius: 5px;
+  margin-bottom: 10px;
   font-size: 15pt;
   height: 50px;
+  padding-left: 10px;
+
 }
 myBtns{
   display: flex;
@@ -57,6 +62,7 @@ myBtns{
 }
 #login:hover, #createAcc:hover{
   background-color: RGB(237,134,150);
+  cursor: pointer;
 }
 #login:active, #createAcc:active{
   background-color: RGB(237,134,150);
@@ -82,4 +88,24 @@ myBtns{
 }
 ::placeholder{
   color: black;
+}
+p{
+  text-align:center;
+}
+#backToSearch{
+  color: black;
+}
+#backToSearch:hover{
+  color: RGB(137,100,150);
+}
+#errorMsg{
+  display: none;
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 10px;
+  border: solid;
+  border-color: RGB(200,0,0);
+  background: RGB(247,217,218);
+  color: black;
+  border-radius: 5px;
 }

@@ -63,6 +63,20 @@ div2{
   border-radius:  5px;
 
 }
+#buttonBreakLine{
+  flex: 0 1 75%;
+  margin-top: 10px;
+}
+p{
+  margin-left: 10px;
+}
+#backToSearch{
+  color: black;
+}
+#backToSearch:hover{
+  color: RGB(137,100,150);
+}
+
 #logout:hover, #stopfollowing:hover{
   background-color: RGB(237,134,150);
 }
