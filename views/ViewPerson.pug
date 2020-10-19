@@ -1,0 +1,25 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  link(rel='stylesheet' href='../layouts/PeoplePageStyle.css')
+  title !{personsName}
+script(src = "ViewPeopleFunctionality.js", id="script",onload="init()",defer)
+header
+  h1  !{personsName}
+  input#follow(type='checkbox')
+  | Follow
+linebreak#forheader
+button#logIn(type='button') Login/Sign Up
+h3#role !{personsProfession}
+linebreak#forrole
+#container
+  ul#recentWork
+    h2 Recent Work
+    for keys of allWorks
+      li !{keys}
+  ul#frequentCollabs
+    h2 Frequent Collaboration
+    for keys of collaberations
+      li !{keys}
+p
+  a#backToSearch(href='http://localhost:3000/') Back to Search

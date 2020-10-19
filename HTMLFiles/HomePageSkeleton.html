@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lan = "en">
+  <head>
+    <meta charset = "UTF-8">
+    <link rel = "stylesheet" href = "HomePageStyle.css">
+    <title>Home Page</Title>
+  </head>
+  <body>
+    <script id="script"src="searchFunctionality.js" onload="init()" defer></script>
+    <button type="button" id="logIn">Login/Sign Up</button>
+    <h1> The Grand Cinema</h1>
+    <divPic>
+      <img src ="logo.png" alt="You should see the 'logo'">
+    </divPic>
+    <div id ="container1">
+        <left> </left>
+        <div name = "name">
+          Title:
+          <input type = "text" placeholder = "Title..." id = "title" class="searchBar">
+        </div>
+        <div name = "director">
+          Director:
+          <input type = "text" placeholder = "Director..." id = "director" class="searchBar">
+        </div>
+        <right> </right>
+    </div>
+    <div id = "container2">
+      <left> </left>
+      <div name = "actor">
+        Actor:
+        <input type = "text" placeholder = "Actor..." id = "actor" class="searchBar">
+      </div>
+      <div name = "genre">
+        Genre:
+        <input type = "text" placeholder = "Genre..." id = "genre" class="searchBar">
+      </div>
+      <right> </right>
+    </div>
+    <button type = "button" id="search">Search</button>
+  </body>
+</html>

@@ -1,0 +1,186 @@
+body{
+  background-color: #dbcbab;
+  width: 95%;
+  margin: 10px auto;
+
+}
+#row1, #row2, #row3, #row4{
+  display:flex;
+  flex-direction: row;
+}
+#container1{
+  display:flex;
+  flex-direction: column;
+}
+#breakContainer{
+  display:flex;
+  flex-direction: column;
+  width: 100px;
+}
+#container2{
+  display:flex;
+  flex-direction: column;
+}
+#container3{
+  display:flex;
+  flex-direction: column;
+}
+img{
+  height: 300px;
+  width: 200px;
+  position: flex;
+  display: block;
+  float: left;
+}
+#logIn:hover, #addReview:hover{
+  background-color: RGB(237,134,150);
+}
+#logIn:active, #addReview:active{
+  background-color: RGB(237,134,150);
+  box-shadow: 0 2px #666;
+  transform: translateY(3px);
+}
+movieTitle{
+  position: flex;
+  float: left;
+  display: block;
+  flex: 0 1 10%;
+  width: 220px;
+  height:30px;
+  margin-left: 10px;
+}
+releaseYear{
+  position:flex;
+  display: block;
+  margin-left: 10px;
+  margin-top: 30px;
+  flex: 0 1 10%;
+  width: 200px;
+  height:30px;
+}
+rating{
+  position: flex;
+  float: left;
+  display: block;
+  flex: 0 1 10%;
+  margin-top: 10px;
+  top:320px;
+  left:80px;
+  width: 220px;
+}
+runTime{
+  position: flex;
+  float: left;
+  display: block;
+  flex: 0 1 10%;
+  margin-left: 10px;
+  margin-top: 30px;
+  width: 220px;
+  height:30px;
+}
+summary{
+  position: flex;
+  display: block;
+  flex: 0 1 10%;
+  margin-left: 10px;
+  width: 250px;
+  height: 530px;
+}
+genre{
+  position: flex;
+  float: left;
+  flex: 0 1 15%;
+  margin-left: 10px;
+  margin-top: 30px;
+  width: 220px;
+  height:30px;
+  overflow-y:scroll;
+}
+director{
+  position: flex;
+  float: left;
+  margin-left: 10px;
+  margin-top: 30px;
+  flex: 0 1 10%;
+  width: 220px;
+  height:30px;
+}
+writers{
+  position: flex;
+  float: left;
+  flex: 0 1 40%;
+  margin-left: 10px;
+  margin-top: 30px;
+  width: 220px;
+  height:30px;
+  overflow-y: scroll;
+}
+actors{
+  position: flex;
+  float: left;
+  flex: 0 1 10%;
+  margin-left: 10px;
+  margin-top: 30px;
+  width: 220px;
+  height: 230px;
+  overflow-y:scroll;
+
+}
+reviews{
+  position: flex;
+  margin-left: 10px;
+  margin-top: 10px;
+  height: 200px;
+  width: 880px;
+  border: solid;
+  overflow-y: scroll;
+
+}
+#addReview{
+  position: flex;
+  float: left;
+  flex-wrap: wrap;
+  flex: 0 1 100%;
+  margin-left: 10px;
+  margin-top: 10px;
+  max-width: 150px;
+  height: 25px;
+  border-radius:  5px;
+
+}
+#logIn{
+  position: flex;
+  float:right;
+  flex: 0 1 10%;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  max-width: 160px;
+  max-height: 25px;
+  border-radius: 5px;
+
+}
+similarMovies{
+  position: flex;
+  display: block;
+  flex: 0 1 10%;
+  margin-left: 10px;
+  margin-top: 10px;
+  width: 250px;
+  height: 530px;
+  border: solid;
+}
+p{
+  position: flex;
+  float: left;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+#backToSearch{
+  color: black;
+}
+#backToSearch:hover{
+  color: RGB(137,100,150);
+}
+li{
+  list-style-type: none;
+}

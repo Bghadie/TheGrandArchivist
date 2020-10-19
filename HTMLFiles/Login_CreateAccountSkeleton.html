@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lan = "en">
+  <head>
+    <meta charset = "UTF-8">
+    <link rel = "stylesheet" href = "../layouts/Login_CreatorStyle.css">
+    <title>Accounts</Title>
+  </head>
+  <body>
+    <script src="../loginFunctionality.js" onload="init()" defer></script>
+    <left></left>
+    <div>
+      <h1>Login or Create an Account</h1>
+      <textFields>
+        <input type = "text" placeholder = "Username..." id = "username">
+        <input type = "text" placeholder = "Password..." id = "password">
+      </textFields>
+      <errorMsg id="errorMsg">
+      </errorMsg>
+      <myBtns>
+        <button type="button" id="login">Login</button>
+        <button type="button" id="createAcc">Create an Account</button>
+      </myBtns>
+      <p> <a id="backToSearch" href="http://localhost:3000/">Back to Search</a></p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+html(lang = 'en')
+  head
+    meta(charset = "UTF-8")
+    style(type = "text/css"): include ../layouts/ViewingMoviesStyle.css
+    Title !{someMovie.Title}
+  body
+    html(lang = 'en')
+    script(src = "ViewMovieFunctionality.js", id="script",onload="init()",defer)
+    #row1
+      #container1
+        poster
+          img(src= someMovie.Poster alt ="well the image isn't loading")
+        rating
+          for ratings of someMovie.Ratings
+            | !{ratings.Source}: !{ratings.Value}
+            br
+      #container2
+        movieTitle
+          | !{someMovie.Title}
+        releaseYear
+          | !{someMovie.Released}
+        runTime
+          |Runtime:
+          | !{someMovie.Runtime}
+        genre
+          |Genre:
+          for genres of someMovie.Genre.split(",")
+            li !{genres}
+        director
+          |Director:
+          for directors of someMovie.Director.split(",")
+            li: a(href="#", onclick ='javascript:findPerson(this, "Director")' name = directors) !{directors}
+        writers
+          |Writers:
+          for writers of someMovie.Writer.split(",")
+            li: a(href="#", onclick ='javascript:findPerson(this, "Writer")' name = writers) !{writers}
+        actors
+          |Actors:
+          for actors of someMovie.Actors.split(",")
+            li: a(href="#", onclick ='javascript:findPerson(this, "Actor")' name = actors) !{actors}
+      #breakContainer
+        |
+      #container3
+        input(type="submit",id="logIn", value="Log in/Sign up")
+        summary
+          |Summary:
+          br
+          |!{someMovie.Plot}
+        similarMovies This one will be tricky to make, list similar movies here
+    #row2
+      input(type="submit",id="addReview", value="Add Review Button")
+    #row3
+      reviews Best movie I've ever seen 4/10
+    #row4
+      p <a id="backToSearch" href="http://localhost:3000/">Back to Search</a>
