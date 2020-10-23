@@ -5,22 +5,20 @@ const pug = require("pug");
 //set the port
 const port = 3000;
 
-//NOTE Movie id's are any number from 1 - 999999
-//NOTE people id' are any number from 1000000+
 
-
-
+//NOTE Movie id's are any integer from 1 - 999999
+//NOTE people id' are any integer from 1000000+
 //get the movie and people database
-const peopleDatabase = require("./peopleDatabase");
-const movieDatabase = require("./movieDatabase");
+const peopleDatabase = require("./content/peopleDatabase");
+const movieDatabase = require("./content/movieDatabase");
 //const movieDatabase = createmovieDatabase(moviesDataBase); //movie database
 //const peopleDatabase = createpeopleDatabaseWithID(moviesDataBase); //people database
 /* what follows is all the testing code just delete comments to run test*/
 //create some random users
 //NOTE, for simplicity's sake, a users "ID" is their username
 const allUsers ={
-  'IllumaDaddy': {password:"notsafepassy", contributing: false, followingUsers: ["JoestInTime", "John", "James"], followingPeople:{1000000:{name:"Tom Hanks"}},reviews:{2:{score: 10, review: "Best movies I've never seen"}}},
-  'JoestInTime': {password:"somesafepassword", contributing: true, followingUsers: [], followingPeople:{1000000:{name:"Tom Hanks"}}, reviews:{8:{score: 3, review: "s"}}}
+  'IllumaDaddy': {password:"notsafepassy", contributing: false, followingUsers: ["JoestInTime", "John", "James"], followingPeople:["1000000"],reviews:{2:{score: 10, review: "Best movies I've never seen"}}},
+  'JoestInTime': {password:"somesafepassword", contributing: true, followingUsers: [], followingPeople:["1000100"], reviews:{8:{score: 3, review: "s"}}}
 };
 
 /****************************************
@@ -222,10 +220,10 @@ Assumption: the function takes a username as a string
 Purpose: sets a user to be a contributing user
 Returns true if succesful, false otherwise
 */
-function becomeContributingUser(user){
+function becomeContributingUser(requestingUser){
   //if the calling user is in the database make them a contributing user
-  if(getIDByUsername(allUsers, user)){
-    user.contributing = true;
+  if(getIDByUsername(allUsers, requestingUser)){
+    allUsers[requestingUser].contributing = true;
     return true;
   }else{
     return false;
@@ -237,10 +235,10 @@ Assumption: the function takes a username as a string
 Purpose: sets a user to be a regular user
 Returns true if succesful, false otherwise
 */
-function becomeRegularUser(user){
+function becomeRegularUser(requestingUser){
   //if the calling user is in the database make them a regular user
-  if(getIDByUsername(allUsers, user)){
-    user.contributing = false;
+  if(getIDByUsername(allUsers, requestingUser)){
+    allUsers[requestingUser].contributing = false;
     return true;
   }else{
     return false;
@@ -252,16 +250,16 @@ Assumption: the function is taking two usernames as strings
 Purpose: adds a user to the calling user's following list
 Returns true if succesful, false otherwise
 */
-function followUser(currentUser, userToFollow){
+function followUser(requestingUser, userToFollow){
   //get both user's ID's
-  let currentUserID = getIDByUsername(allUsers, currentUser);
+  let requestingUserID = getIDByUsername(allUsers, requestingUser);
   let userToFollowID = getIDByUsername(allUsers, userToFollow);
   //if either are not in the database, return false
-  if(!(currentUserID && userToFollowID)){
+  if(!(requestingUserID && userToFollowID)){
     return false;
   }
   //otherwise push the userTofollow into the calling user's follow list
-  allUsers[currentUserID].followingUsers.push(userToFollowID);
+  allUsers[requestingUser].followingUsers.push(userToFollowID);
   return true;
 
 
@@ -272,16 +270,16 @@ Assumption: the function is taking a username and the name of the person to foll
 Purpose: adds a person to the calling user's following list
 Returns true if succesful, false otherwise
 */
-function followPeople(currentUser, personToFollow){
+function followPeople(requestingUser, personToFollow){
   //get the user and person's ID
-  let currentUserID = getIDByUsername(allUsers, currentUser);
+  let requestingUserID = getIDByUsername(allUsers, requestingUser);
   let personToFollowID = getIDByName(peopleDatabase, personToFollow);
   //if either doesn't exist in the databse, return false
-  if(!(currentUserID && personToFollowID)){
+  if(!(requestingUserID && personToFollowID)){
     return false;
   }
   //otherwise push the personToFollow into the calling's user's follow list
-  allUsers[currentUserID].followingPeople[personToFollowID] = {name:personToFollow};
+  allUsers[requestingUser].followingPeople.push(personToFollowID);
   return true;
 };
 
@@ -291,15 +289,15 @@ it add's the user
 Purpsoe: create a user with the specified username and ID
 Returns true if succesful, false otherwise
 */
-function createUser(user, pass){
+function createUser(requestingUser, pass){
   //if the username is already in the database return false
-  if(getIDByUsername(allUsers, user)){
+  if(getIDByUsername(allUsers, requestingUser)){
     return false;
   }
   //create the user and add them to the all user's list
-  allUsers[user] = {password:pass}
+  allUsers[requestingUser] = {password:pass}
   //set them to regular user by defauls
-  allUsers[user].contributing = false;
+  allUsers[requestingUser].contributing = false;
   return true;
 };
 
@@ -309,10 +307,10 @@ Assuption: the function takes a username as a string, a movie name as a string, 
 Purpose: adds a review to a movie
 Returns true if succesful, false otherwise
 */
-function addReview(user, movie, review){
+function addReview(requestingUser, movie, review){
   //get the movie ID and usernameID
   movieID = getIDByTitle(movieDatabase, movie);
-  userID = getIDByUsername(allUsers, user);
+  userID = getIDByUsername(allUsers, requestingUser);
   //if the user or movie don't exist, return false
   if(!movieID || !userID){
     return false;
@@ -395,7 +393,8 @@ function isValidId(someID, flag){
   }
   //check if person ID is valid
   if(flag === 2){
-    if(movieDatabase.length+1000000 > someID){
+    if(Object.keys(peopleDatabase).length+1000000 > someID){
+
       return true;
     }else{
       return false;
@@ -433,8 +432,14 @@ function sortArray(someObjectList){
 //Returns: returns a list of all the films the person has worked on
 function findWork(name){
   let id = getIDByName(peopleDatabase, name);
+  let arrayOfWork = [];
   //return the list of films the person has worked on
-  return peopleDatabase[id].films.split(",");
+  for(works of peopleDatabase[id].films.split(",")){
+    if(!(arrayOfWork.includes(works))){
+      arrayOfWork.push(works);
+    }
+  }
+  return arrayOfWork;
 }
 
 //Assumptions: takes the name of a person as a string and a person's database
@@ -468,6 +473,23 @@ function findCoworker(personDatabase, name){
 app.use(express.static(__dirname))
 
 
+/*
+app.use(express.urlencoded({extended:false}));
+app.use(express.json);
+app.set('view engine', "pug");
+
+*/
+
+
+app.use(function(req, res, next){
+  console.log("----------------------------");
+  console.log("Request Method: " + req.method)
+  console.log("Request URL: " + req.url)
+  console.log("Request Path: " + req.path)
+  console.log();
+  next();
+});
+
 //These are my server's get methods, all are pretty straight
 //forward but I included some comments for clarity
 app.get("/", (req, res) => {
@@ -476,51 +498,62 @@ app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.end(renderHome({}));
 });
-
 app.get("/movies", (req, res) =>{
   let renderMovies = pug.compileFile("./views/ViewMovie.pug");
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/html");
   let movie = null; //basically a flag variable
-  let id = parseInt(req.query.id, 10); //get the ID the user searched for
-  if(isValidId(id, 1)){ //check if its a valid ID
-    res.end(renderMovies({"someMovie":movieDatabase[id].data})); //if its vald, find the movie
-  }else{
-    //otherwise check if the movie title the user entered is in the database
-    for(keys of Object.keys(movieDatabase)){
-      if(req.query.title.toUpperCase() === movieDatabase[keys].data.Title.toUpperCase()){
-        movie = movieDatabase[keys].data; //replace the null with a value
-      }
-    }
-    //if the movie is in the database, render it otherwise render a random movie
-    if(movie !== null){
-      res.end(renderMovies({"someMovie":movie}));
-    }else{
-      let randNum = Math.floor((Math.random()*(Object.keys(movieDatabase).length - 1))+1);
-      res.end(renderMovies({"someMovie":movieDatabase[randNum].data}));
+  for(keys of Object.keys(movieDatabase)){
+    if(req.query.title.toUpperCase() === movieDatabase[keys].data.Title.toUpperCase()){
+      movie = movieDatabase[keys].data; //replace the null with a value
     }
   }
+  //if the movie is in the database, render it otherwise render a random movie
+  if(movie !== null){
+    res.end(renderMovies({"someMovie":movie}));
+  }else{
+    let randNum = Math.floor((Math.random()*(Object.keys(movieDatabase).length - 1))+1);
+    res.end(renderMovies({"someMovie":movieDatabase[randNum].data}));
+  }
 
+});
+app.get("/movies:id", (req, res) =>{
+  let renderMovies = pug.compileFile("./views/ViewMovie.pug");
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/html");
+  let id = parseInt(req.query.id); //get the ID the user searched for
+  if(isValidId(id, 1)){ //check if its a valid ID
+    res.end(renderMovies({"someMovie":movieDatabase[id].data})); //if its valid, find the movie
+  }
 });
 app.get("/people", (req,res)=>{
   let renderPeople = pug.compileFile("./views/ViewPerson.pug");
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/html");
-  let queryName = req.query.name;
-  let name = ""
-  //remove paratheses from query string
-  for(letters of queryName){
-    if(letters === "("){
-      break;
-    }else{
-      name += letters;
-    }
+  let queryName = req.query.name; //get the name the user entered
+  if(queryName != ""){
+    let id = getIDByName(peopleDatabase, queryName); //get the person's ID
+    let allWork = findWork(queryName.trim()); //get all the work their in
+    let profession = peopleDatabase[id].profession; //get their profession
+    let allCollabs = findCoworker(allWork, queryName); //find their collaberations
+    let sortAllCollabs = sortArray(allCollabs); //sort their collaboration by most frequent
+    //render the page
+    res.end(renderPeople({"allWorks":allWork, "personsName":queryName, "personsProfession":profession, "collaberations":sortAllCollabs}));
   }
-  let profession = req.query.profession;
-  let allWork = findWork(name.trim());
-  let allCollabs = findCoworker(allWork, queryName);
-  let sortAllCollabs = sortArray(allCollabs);
-  res.end(renderPeople({"allWorks":allWork, "personsName":name, "personsProfession":profession, "collaberations":sortAllCollabs}));
+});
+app.get("/people:id", (req,res)=>{
+  let renderPeople = pug.compileFile("./views/ViewPerson.pug");
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/html");
+  let id = parseInt(req.query.id); //convert the ID into an int
+  if(isValidId(id,2)){ //check that its valid
+    let allWork = findWork(peopleDatabase[id].name); //get all the work their in
+    let profession = peopleDatabase[id].profession; //get their profession
+    let allCollabs = findCoworker(allWork, peopleDatabase[id].name); //find their collaberations
+    let sortAllCollabs = sortArray(allCollabs); //sort their collaboration by most frequent
+    //render the page
+    res.end(renderPeople({"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":profession, "collaberations":sortAllCollabs}));
+  }
 });
 
 app.get("/logIn",(req, res) =>{

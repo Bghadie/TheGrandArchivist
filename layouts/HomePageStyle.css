@@ -15,7 +15,7 @@ body{
   width: 95%
   margin: 10px auto;
 }
-#logIn:hover, #search:hover{
+#logIn:hover, #search:hover, #searchCriteria:hover{
   background-color: RGB(237,134,150);
 }
 #logIn:active, #search:active{
@@ -33,9 +33,6 @@ body{
 }
 left{
   flex:0 1 30%;
-}
-.name .director .actor .genre{
-  flex: 0 1 40%;
 }
 div{
   padding: 10px;
@@ -60,5 +57,19 @@ img{
   margin-left: 80px;
   padding-bottom: 10px;
   border-radius:  5px;
+
+}
+#searchCriteria{
+  margin-top: 10px;
+  height: 35px;
+  margin-right: 10px;
+  width: 150px;
+}
+
+
+#searchBar{
+  margin-top: 10px;
+  height: 29px;
+  margin-bottom: 10px;
 
 }

@@ -6,39 +6,18 @@ html(lang = 'en')
     Title Home Page
   body
 
-    script(src = "searchFunctionality.js", id="script",onload="init()",defer)
+    script(src = "../content/searchFunctionality.js", id="script",onload="init()",defer)
     input(type="submit",id="logIn", value="Login/Sign Up")
     h1 The Grand Cinema
     img(src ="./logo.png", alt="You should see the 'logo'")
     #container1
-      Left
-      <div name = "name">
-        p Title:
-        input(type = "text", placeholder = "Title...", id = "title", class="searchBar")
-      </div>
-      <div name = "director">
-        p Director:
-        input(type = "text", placeholder = "Director...", id = "director", class="searchBar")
-      </div>
-      <div name = "ID">
-        p ID:
-        input(type = "text", placeholder = "ID...", id = "ID", class="searchBar")
-      </div>
-      Right
-    #container2
-      Left
-      <div name = "actor">
-        p Actor:
-        <input type = "text" placeholder = "Actor..." id = "actor" class="searchBar">
-      </div>
-      <div name = "genre">
-        p Genre:
-        <input type = "text" placeholder = "Genre..." id = "genre" class="searchBar">
-      </div>
-      <div name = "user">
-        p User:
-        <input type = "text" placeholder = "User..." id = "User" class="searchBar">
-      </div>
-      Right
-    </div>
+    left
+    select#searchCriteria(name='searchCriteria')
+      option#Title(value='Title') Title
+      option#Person(value='Person') Person
+      option#User(value='User') User
+      option#Genre(value='Genre') Genre
+      option#Rating(value='Rating') Rating
+    input#searchBar.searchBar(type='text' placeholder = "Title...")
+    right
     input(type="submit",id="search", value = "Search")

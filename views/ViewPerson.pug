@@ -1,9 +1,11 @@
 doctype html
+- var countCollabs = 0
+- var works = 0
 head
   meta(charset='UTF-8')
   link(rel='stylesheet' href='../layouts/PeoplePageStyle.css')
   title !{personsName}
-script(src = "ViewPeopleFunctionality.js", id="script",onload="init()",defer)
+script(src = "../content/ViewPeopleFunctionality.js", id="script",onload="init()",defer)
 header
   h1  !{personsName}
   input#follow(type='checkbox')
@@ -16,10 +18,14 @@ linebreak#forrole
   ul#recentWork
     h2 Recent Work
     for keys of allWorks
-      li !{keys}
+      if(works < 10)
+        li !{keys}
+      - works++
   ul#frequentCollabs
     h2 Frequent Collaboration
     for keys of collaberations
-      li !{keys}
+      if(countCollabs < 10)
+        li !{keys}
+      - countCollabs++
 p
   a#backToSearch(href='http://localhost:3000/') Back to Search
