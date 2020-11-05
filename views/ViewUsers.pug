@@ -3,43 +3,40 @@ head
   meta(charset='UTF-8')
   link(rel='stylesheet' href='../layouts/UserAccountStyle.css')
   title Account
-h1 User&apos;s Name
+h1#currUser !{name}
 div2
 button#logout(type='button') Logout
-input#usertype(type='checkbox')
+input#usertype(type='checkbox' checked = someUser.contributing)
 | Contributing User
 div1#breakline
+script#script(src='../content/userFunctionality.js' onload='init()' defer='')
 #recommended
   h2 Recommended Movies
   ul
-    li Some Movie
-    li Another Movie
-    li One more Movie
+  if(someUser.recommendedMovies.length > 0)
+    for movies of someUser.recommendedMovies
+      a(href="#", onclick ='javascript:findMovie(this)' name = movies)#link !{movies}
+
 #usersfollowing
   h2 Users Followed
   ul
-    li  Some Username
-    li  Illumaghadie (thats me!)
+  if(someUser.followingUsers.length > 0)
+    for users of someUser.followingUsers
+      li#link !{users}
 #resentreviews
   h2 Recent Reviews
   ul
-    li  The first rated Movie
+  for names of Object.keys(someUser.reviews)
+    a(href="#", onclick ='javascript:findMovie(this)' name = names)#link !{names}
     ul
-      li 5/10
-      li There may be a TON of text here lol
-    li  The second rated Movie
-    ul
-      li 10/10
-      li This may have even more text
-    li  The third rated Movie
-    ul
-      li 0/10
-      li insert text
+      li Score: !{someUser.reviews[names].score}
+      li Review: !{someUser.reviews[names].review}
 #peoplefollowing
   h2 People Followed
   ul
-    li  It feels like you only need a single list for this
-    li  John Doe
+  if(someUser.followingPeople.length > 0)
+    for people of someUser.followingPeople
+      a(href="#", onclick ='javascript:findPerson(this)', name = people)#link !{people}
 button#stopfollowing(type='button') Stop Following
 div1#buttonBreakLine
 p

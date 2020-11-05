@@ -1,0 +1,20 @@
+doctype html
+- var movies = 0
+head
+  meta(charset='UTF-8')
+  link(rel='stylesheet' href='../layouts/similarMovies.css')
+  title Search
+script#script(src='../content/similarMovies.js' onload='init()' defer='')
+h1 Because You Searched: "!{searchCriteria}"
+for key of someMovies
+  if(movies < 50)
+    #container
+      divpic
+        img#poster(src= key.data.Poster alt='Some Movie Poster' onclick ='javascript:findMovie(this)' name = key.data.Title)
+      #container2
+        a(href="#", onclick ='javascript:findMovie(this)' name = key.data.Title)#title !{key.data.Title}
+        p#summary !{key.data.Plot}
+  - movies++
+#PrevNext
+  a(href="#", onclick ='javascript:prevPageMovie(this)' name = previous)#previous Previous
+  a(href="#", onclick ='javascript:nextPageMovie(this)' name = next)#next Next

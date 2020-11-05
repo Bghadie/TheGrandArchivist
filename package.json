@@ -4,9 +4,13 @@
   "description": "A movie server database",
   "main": "ViewMovieFunctionality.js",
   "dependencies": {
+    "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
     "i": "^0.3.6",
-    "pug": "^3.0.0"
+    "pandas-js": "^0.2.4",
+    "pug": "^3.0.0",
+    "python-shell": "^2.0.2"
   },
   "devDependencies": {
     "express": "~4.9.0",

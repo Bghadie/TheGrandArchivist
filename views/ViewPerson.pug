@@ -19,13 +19,13 @@ linebreak#forrole
     h2 Recent Work
     for keys of allWorks
       if(works < 10)
-        li !{keys}
+        li: a(href="#", onclick ='javascript:findMovie(this)' name = keys) !{keys}
       - works++
   ul#frequentCollabs
     h2 Frequent Collaboration
     for keys of collaberations
       if(countCollabs < 10)
-        li !{keys}
+        li: a(href="#", onclick ='javascript:findPerson(this)' name = keys) !{keys}
       - countCollabs++
 p
   a#backToSearch(href='http://localhost:3000/') Back to Search

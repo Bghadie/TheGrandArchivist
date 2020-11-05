@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const allInformation = require("./movie_data.json");
+const allInformation = require("./movie-data.json");
 database = {};
 
 // creates movie database:
@@ -8,10 +8,11 @@ index = 0;
 for(films of allInformation){
   let data = films
   database[index] = {data}
+  database[index].data.review = {};
   index++;
 }
 let json = JSON.stringify(database);
-fs.writeFile('movieDatabase.json', json, 'utf8', function(err) {
+fs.writeFile('movieDatabase1.json', json, 'utf8', function(err) {
     if (err) throw err;
     console.log('complete');
     }

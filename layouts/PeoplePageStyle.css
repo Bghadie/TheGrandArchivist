@@ -48,6 +48,13 @@ header{
   box-shadow: 3px 3px 1px;
 
 }
+a:link{
+  text-decoration: none;
+  color: black;
+}
+a:hover{
+  color: blue;
+}
 li{
   padding-bottom: 10px;
 }

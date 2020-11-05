@@ -18,6 +18,9 @@ html(lang = 'en')
       option#User(value='User') User
       option#Genre(value='Genre') Genre
       option#Rating(value='Rating') Rating
-    input#searchBar.searchBar(type='text' placeholder = "Title...")
+      option#Year(value='Year') Year
+    form(autocomplete='off')
+      .autocomplete(style='width:100%;')
+        input#searchBar.searchBar(type='text' placeholder = "Title...")
     right
     input(type="submit",id="search", value = "Search")

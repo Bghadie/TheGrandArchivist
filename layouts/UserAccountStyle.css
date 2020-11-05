@@ -85,3 +85,16 @@ p{
   box-shadow: 0 2px #666;
   transform: translateY(4px);
 }
+#link{
+  color:black;
+}
+#link:hover{
+  color:blue;
+  cursor: pointer;
+}
+li{
+  list-style-type: none;
+}
+a{
+  text-decoration: none;
+}

@@ -1,7 +1,11 @@
+
 //Get the required modules
 const express = require("express");
 const app = express();
 const pug = require("pug");
+const {PythonShell} = require('python-shell');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 //set the port
 const port = 3000;
 
@@ -15,10 +19,11 @@ const movieDatabase = require("./content/movieDatabase");
 //const peopleDatabase = createpeopleDatabaseWithID(moviesDataBase); //people database
 /* what follows is all the testing code just delete comments to run test*/
 //create some random users
+
 //NOTE, for simplicity's sake, a users "ID" is their username
 const allUsers ={
-  'IllumaDaddy': {password:"notsafepassy", contributing: false, followingUsers: ["JoestInTime", "John", "James"], followingPeople:["1000000"],reviews:{2:{score: 10, review: "Best movies I've never seen"}}},
-  'JoestInTime': {password:"somesafepassword", contributing: true, followingUsers: [], followingPeople:["1000100"], reviews:{8:{score: 3, review: "s"}}}
+  'IllumaDaddy': {password:"notsafepassy", contributing: false, followingUsers: ["JoestInTime", "John", "James"], followingPeople:["Tom Hanks"],reviews:{"Toy Story":{score: 10, review: "Best movies I've never seen"}},recommendedMovies:[]},
+  'JoestInTime': {password:"somesafepassword", contributing: true, followingUsers: [], followingPeople:["Pete Docter"], reviews:{"Up":{score: 3, review: "s"}},recommendedMovies:[]}
 };
 
 /****************************************
@@ -33,12 +38,16 @@ const allUsers ={
 
 
 //test 1, Check that reviews can be added:
-/*
+
+
 addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"});
+addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"});
+addReview("JoestInTime", "Toy Story", {score:7, review:"YAY"});
+addReview("JoestInTime", "Help!", {score:7, review:"YAY"});
 let id = getIDByTitle(movieDatabase, "Toy Story")
-console.log(movieDatabase[id]); //Movie toy story should have a review now
-console.log(allUsers); //IllumaDaddy should have a review for movie with id 0 and 2
-*/
+//console.log(movieDatabase[id]); //Movie toy story should have a review now
+//console.log(allUsers); //IllumaDaddy should have a review for movie with id 0 and 2
+
 
 
 
@@ -113,7 +122,136 @@ console.log(addPersonToMovie("Jumanji", "Nick Suzuki", "WRITER"));
 /*END OF TESTING CODE */
 
 
+function getListOfReviews(threshold){
+  let matchedMovies = [];
+  let count;
+  let average;
+  Object.keys(movieDatabase).forEach(function(id){
+    sum = 0;
+    if(Object.keys(movieDatabase[id].data.review).length === 0){
+      average = 0;
+    }else{
+      count = Object.keys(movieDatabase[id].data.review).length;
+      for(users of Object.keys(movieDatabase[id].data.review)){
+        sum += movieDatabase[id].data.review[users].score;
+      }
+      average = sum/count
+    }
+    if(average >= threshold){
+      matchedMovies.push(movieDatabase[id]);
+    }
+  });
+  return matchedMovies;
+}
 
+function findMaxYear(){
+  let max = 0;
+  for(id of Object.keys(movieDatabase)){
+    let year = parseInt(movieDatabase[id].data.Year.split("-"));
+    if(year > max){
+      max = year;
+    }
+  }
+  return max;
+}
+
+function findMinYear(){
+  let min = 3005; //some random number
+  for(id of Object.keys(movieDatabase)){
+    let year = parseInt(movieDatabase[id].data.Year.split("-"));
+    if(year < min){
+      min = year;
+    }
+  }
+  return min;
+}
+
+function getAllTitles(){
+  let titles = []
+  Object.keys(movieDatabase).forEach(function(id) {
+    titles.push(movieDatabase[id].data.Title);
+  });
+  return titles;
+}
+
+function findSimilarMovies(partialTitle, pageNum){
+  let similarMovies = [];
+  Object.keys(movieDatabase).forEach(function(id) {
+    if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
+      similarMovies.push(movieDatabase[id]);
+    }
+  });
+  let numberOfItemsPerPage = 50;
+  var start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+  return similarMovies.splice(start,50);
+}
+
+function findMaxPage(partialTitle){
+  let similarMovies = [];
+  Object.keys(movieDatabase).forEach(function(id) {
+    if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
+      similarMovies.push(movieDatabase[id]);
+    }
+  });
+  if(similarMovies.length <=50){
+    return 0;
+  }else{
+    return Math.floor(similarMovies.length/50);
+  }
+}
+function findMaxGenre(genre){
+  let similarGenres = [];
+  if(genre.trim().includes(",")){
+    genre = genre.trim().split(",");
+  }else{
+    genre = genre.trim().split(" ");
+  }
+  for(index in genre){
+    genre[index] = genre[index].trim()
+  }
+  Object.keys(movieDatabase).forEach(function(id){
+    let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
+    for(item in placeHolder){
+      placeHolder[item] = placeHolder[item].trim();
+    }
+    let check = genre.every((value)=>
+      placeHolder.includes(value));
+    if(check){
+      similarGenres.push(movieDatabase[id]);
+    }
+  });
+  if(similarGenres.length <= 50){
+    return 0;
+  }else{
+    return Math.floor(similarGenres.length/50);
+  }
+}
+
+function findGenres(genre, pageNum){
+  let similarGenres = [];
+  if(genre.trim().includes(",")){
+    genre = genre.trim().split(",");
+  }else{
+    genre = genre.trim().split(" ");
+  }
+  for(index in genre){
+    genre[index] = genre[index].trim()
+  }
+  Object.keys(movieDatabase).forEach(function(id){
+    let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
+    for(item in placeHolder){
+      placeHolder[item] = placeHolder[item].trim();
+    }
+    let check = genre.every((value)=>
+      placeHolder.includes(value));
+    if(check){
+      similarGenres.push(movieDatabase[id]);
+    }
+  });
+  let numberOfItemsPerPage = 50;
+  var start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+  return similarGenres.splice(start, 50);
+}
 /*
 Assumption: the function takes a person's name and profession as a string
 NOTE: the profession (i.e., ACTOR, DIRECTOR, or WRITER) should be entered in all caps
@@ -160,7 +298,6 @@ function createPerson(personsName){
   peopleDatabase[Object.keys(peopleDatabase).length + 1000000] = {name:personsName}
   return true;
 };
-
 
 
 /*
@@ -316,9 +453,9 @@ function addReview(requestingUser, movie, review){
     return false;
   }
   //add the review to the movie in the moviedatabase
-  movieDatabase[movieID].data.reviews = review;
+  movieDatabase[movieID].data.review[requestingUser] = review;
   //add the review to the user in the user database
-  allUsers[userID].reviews[movieID] = review;
+  allUsers[userID].reviews[movieDatabase[movieID].data.Title] = review;
   return true;
 };
 
@@ -360,6 +497,26 @@ function removePara(personObj){
   return personObj;
 }
 
+//Assumption: some person name
+//Purpose: removes paratheses from a writers name
+//Returns The person object without paratheses (some writer names have paraentheses in them)
+function removePara(name){
+  //create an empty name string
+  let newName = ""
+  //iterate over the letter indexes of the person objects name
+  for(letters in name){
+    //check each letter and if its a parentheses quit the loop
+    if(name[letters] === "("){
+      break;
+    }
+    //append the letter to the empty name string
+    newName+=name[letters];
+  }
+  //return the person object
+  return newName;
+}
+
+
 //Assumptions: takes the approrpaite value (e.g., title as a string, username as a string, and person name as a string)
 //and the object that the value should be stored in (e.g., a database)
 //Purpose: finds the key of a specific value in a database
@@ -393,8 +550,7 @@ function isValidId(someID, flag){
   }
   //check if person ID is valid
   if(flag === 2){
-    if(Object.keys(peopleDatabase).length+1000000 > someID){
-
+    if((Object.keys(peopleDatabase).length+1000000) > someID && someID >= 1000000){
       return true;
     }else{
       return false;
@@ -468,17 +624,29 @@ function findCoworker(personDatabase, name){
   return array;
 }
 
-
+function auth(req,res,next){
+  if(!req.session.loggedIn){
+    res.status(401).send("Unauthorized Access");
+    return;
+  }else{
+    next();
+  }
+}
 //set the directory
 app.use(express.static(__dirname))
-
-
-/*
-app.use(express.urlencoded({extended:false}));
-app.use(express.json);
 app.set('view engine', "pug");
+app.use(express.urlencoded({extended: false}));
+app.use(express.json());
+app.use(cookieParser());
 
-*/
+app.use(session({
+  secret: "Issa Secret",
+  username: "SomeID",
+  cookie:{
+    maxAge: 2*60*60*1000 //session expires in 2 hours
+   }
+}));
+
 
 
 app.use(function(req, res, next){
@@ -487,81 +655,258 @@ app.use(function(req, res, next){
   console.log("Request URL: " + req.url)
   console.log("Request Path: " + req.path)
   console.log();
+  console.log(req.session)
   next();
 });
+
 
 //These are my server's get methods, all are pretty straight
 //forward but I included some comments for clarity
 app.get("/", (req, res) => {
-  let renderHome = pug.compileFile("./views/HomePage.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
-  res.end(renderHome({}));
+  res.render("HomePage",{});
 });
+
+app.get("/movieTitles", (req, res) =>{
+  let allTitles = getAllTitles();
+  res.write(JSON.stringify(allTitles));
+  res.end();
+});
+
 app.get("/movies", (req, res) =>{
-  let renderMovies = pug.compileFile("./views/ViewMovie.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
-  let movie = null; //basically a flag variable
-  for(keys of Object.keys(movieDatabase)){
-    if(req.query.title.toUpperCase() === movieDatabase[keys].data.Title.toUpperCase()){
-      movie = movieDatabase[keys].data; //replace the null with a value
+  let movie = getIDByTitle(movieDatabase,req.query.title); //basically a flag variable
+  //if the movie is in the database, render it otherwise render a random movie
+  if(movie){
+    res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+  }else{
+    let moviesByTitle = findSimilarMovies(req.query.title.toUpperCase(), parseInt(req.query.pageNum));
+    if(moviesByTitle.length > 0 && req.query.title !== ""){
+      res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": req.query.title});
+    }else{
+      res.statusCode = 404;
+      res.end();
     }
   }
-  //if the movie is in the database, render it otherwise render a random movie
-  if(movie !== null){
-    res.end(renderMovies({"someMovie":movie}));
-  }else{
-    let randNum = Math.floor((Math.random()*(Object.keys(movieDatabase).length - 1))+1);
-    res.end(renderMovies({"someMovie":movieDatabase[randNum].data}));
-  }
-
 });
 app.get("/movies:id", (req, res) =>{
-  let renderMovies = pug.compileFile("./views/ViewMovie.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
   let id = parseInt(req.query.id); //get the ID the user searched for
   if(isValidId(id, 1)){ //check if its a valid ID
-    res.end(renderMovies({"someMovie":movieDatabase[id].data})); //if its valid, find the movie
+    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
   }
 });
 app.get("/people", (req,res)=>{
-  let renderPeople = pug.compileFile("./views/ViewPerson.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
-  let queryName = req.query.name; //get the name the user entered
-  if(queryName != ""){
-    let id = getIDByName(peopleDatabase, queryName); //get the person's ID
-    let allWork = findWork(queryName.trim()); //get all the work their in
+  let queryName = removePara(req.query.name); //get the name the user entered
+  if(getIDByName(peopleDatabase, queryName.trim())){
+    let id = getIDByName(peopleDatabase, queryName.trim()); //get the person's ID
+    let allWork = findWork(queryName.trim())
     let profession = peopleDatabase[id].profession; //get their profession
-    let allCollabs = findCoworker(allWork, queryName); //find their collaberations
-    let sortAllCollabs = sortArray(allCollabs); //sort their collaboration by most frequent
+    let sortAllCollabs = sortArray(findCoworker(allWork, queryName)); //sort their collaboration by most frequent
     //render the page
-    res.end(renderPeople({"allWorks":allWork, "personsName":queryName, "personsProfession":profession, "collaberations":sortAllCollabs}));
+    res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
   }
 });
 app.get("/people:id", (req,res)=>{
-  let renderPeople = pug.compileFile("./views/ViewPerson.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
   let id = parseInt(req.query.id); //convert the ID into an int
   if(isValidId(id,2)){ //check that its valid
-    let allWork = findWork(peopleDatabase[id].name); //get all the work their in
+    console.log(id)
     let profession = peopleDatabase[id].profession; //get their profession
-    let allCollabs = findCoworker(allWork, peopleDatabase[id].name); //find their collaberations
-    let sortAllCollabs = sortArray(allCollabs); //sort their collaboration by most frequent
+    let allWork = findWork(peopleDatabase[id].name.trim())
+    let sortAllCollabs = sortArray(findCoworker(allWork, peopleDatabase[id].name)); //sort their collaboration by most frequent
     //render the page
-    res.end(renderPeople({"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":profession, "collaberations":sortAllCollabs}));
+    res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
   }
 });
 
-app.get("/logIn",(req, res) =>{
-  let renderUser = pug.compileFile("./views/ViewUsers.pug");
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html");
-  res.end(renderUser({}));
+app.get("/genre", (req,res) =>{
+  let listOfMovies = findGenres(req.query.genre.toUpperCase(), parseInt(req.query.pageNum));
+  if(listOfMovies){
+    if(listOfMovies.length > 0){
+      res.render("ViewGenre",{"someMovies":listOfMovies, "searchCriteria": req.query.genre});
+    }else{
+      res.statusCode = 404;
+      res.end();
+    }
+  }else{
+    res.statusCode = 404;
+    res.end();
+  }
 });
+
+app.get("/review",(req,res) =>{
+  let threshold = parseFloat(req.query.rating);
+  if(threshold >=0){
+    let matchedMovies = getListOfReviews(threshold);
+    let criteria = "Movies with Rating of at least " + threshold
+    let numberOfItemsPerPage = 50;
+    let start = ((parseInt(req.query.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+    res.render("ViewMovieList",{"someMovies":matchedMovies.splice(start,50), "searchCriteria": criteria});
+  }else{
+    res.statusCode = 404;
+    res.end();
+  }
+});
+app.get("/year",(req,res) =>{
+  let threshold = parseInt(req.query.year);
+  let minimumYear = findMinYear();
+  let maximumYear = findMaxYear();
+  let matchedMovies = [];
+  let criteria;
+  if(threshold >= minimumYear && threshold <= maximumYear){
+    Object.keys(movieDatabase).forEach(function(id){
+      let year = parseInt(movieDatabase[id].data.Year.split("–"));
+      if(year === threshold){
+        matchedMovies.push(movieDatabase[id]);
+      }
+    });
+   criteria = threshold
+  }else{
+    Object.keys(movieDatabase).forEach(function(id){
+      matchedMovies.push(movieDatabase[id]);
+    });
+    criteria = "Any Year"
+  }
+  let numberOfItemsPerPage = 50;
+  let start = ((parseInt(req.query.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+  res.render("ViewMovieList",{"someMovies":matchedMovies.splice(start,50), "searchCriteria": criteria});
+
+});
+app.get("/findMaxPageMovie", (req,res) =>{
+  let maxPageNum = findMaxPage(req.query.title.toUpperCase());
+  res.end(maxPageNum.toString());
+});
+app.get("/findMaxPageGenre", (req,res) =>{
+  let maxPageNum = findMaxGenre(req.query.genre.toUpperCase());
+  res.end(maxPageNum.toString());
+});
+
+app.get("/findMaxPageYear", (req,res) =>{
+  let threshold = parseInt(req.query.year);
+  let minimumYear = findMinYear();
+  let maximumYear = findMaxYear();
+  let matchedMovies = [];
+  let criteria;
+  if(threshold >= minimumYear && threshold <= maximumYear){
+    Object.keys(movieDatabase).forEach(function(id){
+      let year = parseInt(movieDatabase[id].data.Year.split("–"));
+      if(year === threshold){
+        matchedMovies.push(movieDatabase[id]);
+      }
+    });
+  }else{
+    Object.keys(movieDatabase).forEach(function(id){
+      matchedMovies.push(movieDatabase[id]);
+    });
+  }
+  if(matchedMovies.length <=50){
+    res.end("0");
+  }else{
+    let maxPage = Math.floor((matchedMovies.length)/50);
+    res.end(maxPage.toString());
+  }
+});
+
+app.get("/findMaxPageRating", (req,res) =>{
+  let threshold = parseFloat(req.query.rating);
+  let matchedMovies = getListOfReviews(threshold);
+  if(matchedMovies.length <=50){
+    res.end("0");
+  }else{
+    let maxPage = Math.floor((matchedMovies.length)/50);
+    res.end(maxPage.toString());
+  }
+});
+
+/*
+shout out to:
+https://github.com/extrabacon/python-shell
+allowed me to create a shell to run my python script
+Assumption: takes a string consisting of MovieTitle,MovieYear as an argument
+*/
+app.get("/recommendMovieGeneral",(req, res) =>{
+  let someString = req.query.info;
+  let movieExists = getIDByTitle(movieDatabase, someString.split(",")[0]);
+  if(movieExists){
+    let pyshell = new PythonShell("movieRecommender.py");
+    pyshell.send(someString)
+    pyshell.on('message', function(message){
+      let arr = message.split("|").filter(function(e){
+        return e !== "";
+      });
+      let movieObjs = []
+      for(titles of arr){
+        movieObjs.push(movieDatabase[getIDByTitle(movieDatabase,titles)].data);
+      }
+      res.render("ReccMovieGen", {"someMovies":movieObjs});
+    });
+    pyshell.end(function(err,code,signal){
+      //these exist for testing purposes
+    /*  console.log('The exit code was: ' + code);
+      console.log('The exit signal was: ' + signal);
+      console.log('finished');*/
+    });
+  }
+});
+
+
+app.post("/createAccount", (req, res) =>{
+  let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*]{10,}$/;
+  let username= req.body.username;
+  let password = req.body.password;
+  let isValidPass = reg.test(password);
+  //if username isn't valid dispaly error message
+  if(username.length == 0){
+    res.statusCode = 440; //entered an invalid username
+    res.end()
+  }else if(getIDByUsername(allUsers, username)){
+    res.statusCode = 441; //user already exists
+    res.end()
+  }else if(!isValidPass){ //if password isn't valid display error message
+    res.statusCode = 442; //invalid password
+    res.end()
+  }else{
+    allUsers[username] = {password:password, contributing: false, followingUsers: [], followingPeople:[], recommendedMovies:[],reviews:{}};
+    req.session.username = getIDByUsername(allUsers, username);
+    req.session.loggedIn = true;
+    req.session.username = username;
+    res.send();
+  }
+});
+
+app.get("/userPage", auth ,(req,res)=>{
+  res.render("ViewUsers",{"someUser":allUsers[req.query.username], "name": req.query.username});
+});
+app.get("/loginPage", (req, res) =>{
+  res.render("ViewLoginPage",{});
+});
+app.post("/loginUser", (req, res) =>{
+  let username= req.body.username;
+  let password = req.body.password;
+  if(getIDByUsername(allUsers, username)){
+    if(allUsers[username].password === password){
+      req.session.loggedIn = true;
+      req.session.username = username;
+      res.send();
+    }else{
+      res.statusCode = 442; //invalid password
+      res.end()
+    }
+  }else{
+    res.statusCode = 440; //entered an invalid username
+    res.end()
+  }
+});
+app.get("/logout", auth, (req, res)=>{
+  req.session.destroy();
+  res.render("HomePage",{});
+});
+app.get("/checkCurrUser",auth,(req, res)=>{
+  if(req.session.username === req.query.user){
+    res.statusCode = 200;
+    res.end();
+  }else{
+    res.statusCode = 430
+    res.end();
+  }
+})
 
 app.listen(port, ()=>{
   console.log("Currently Listening at http:/localHost: " + port)
