@@ -1,0 +1,10 @@
+{
+  "IllumaDaddy": {"password":"notsafepassy", "contributing": true, "followingUsers": ["JoestInTime"], "followingPeople":["Tom Hanks"],"reviews":{"Toy Story":{"score": 10, "review": "Best movies I've never seen"}},"recommendedMovies":[], "alerts":[]},
+
+  "IlluaDaddy": {"password":"notsafepassy", "contributing": false, "followingUsers": ["JoestInTime", "John", "James"], "followingPeople":["Tom Hanks"],"reviews":{"Toy Story":{"score": 10, "review": "Best movies I've never seen"}},"recommendedMovies":[], "alerts":[]},
+
+  "JoestInTime": {"password":"somesafepassword", "contributing": true, "followingUsers": [], "followingPeople":["Pete Docter"], "reviews":{"Up":{"score": 3, "review": "s"}},"recommendedMovies":[],"alerts":[]},
+
+  "JeganPurushothaman": {"password":"Password123", "contributing": false, "followingUsers": ["JoestInTime","IllumaDaddy"], "followingPeople":["Tom Hanks", "Martin Short", "Al Pacino"],"reviews":{},"recommendedMovies":[], "alerts":[]},
+  "BillalGhadie": {"password":"Password123", "contributing": false, "followingUsers": ["JeganPurushothaman"], "followingPeople":["Terry Crews", "Miley Cyrus", "Robin Williams"],"reviews":{},"recommendedMovies":[], "alerts":[]}
+}

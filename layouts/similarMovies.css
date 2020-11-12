@@ -21,12 +21,24 @@ h1{
 #container2{
   margin-left: 10px;
 }
-#title{
+#title, #name{
   max-height: 20%;
   color: black;
   text-decoration: none;
 }
-#title:hover, #previous:hover, #next:hover{
+#container5{
+  font-size: 16pt;
+  margin-top: 15px;
+  border: solid;
+  background-color: white;
+  height: 40px;
+  text-align: center;
+  padding-top: 10px;
+  box-shadow: 1px 1px 1px 1px;
+
+
+}
+#title:hover, #previous:hover, #next:hover, #name:hover{
   color: blue;
 }
 #summary{

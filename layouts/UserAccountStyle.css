@@ -16,6 +16,8 @@ div{
   border-bottom: 2px solid;
   background: white;
   padding: 10px;
+  max-height: 700px;
+  overflow-y: scroll;
 }
 div2{
   flex: 0 1 16%;
@@ -38,6 +40,7 @@ div2{
   flex: 0 1 75%;
   border-right: none;
   border-bottom: none;
+  max-width: 600px;
 }
 #usersfollowing{
   flex: 0 1 20%;
@@ -49,6 +52,7 @@ div2{
   flex: 0 1 75%;
   border-right: none;
   border-top: none;
+  max-width: 600px;
 
 }
 #peoplefollowing{
@@ -85,6 +89,11 @@ p{
   box-shadow: 0 2px #666;
   transform: translateY(4px);
 }
+#stopfollowing:disabled{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
 #link{
   color:black;
 }
@@ -95,6 +104,7 @@ p{
 li{
   list-style-type: none;
 }
+
 a{
   text-decoration: none;
 }

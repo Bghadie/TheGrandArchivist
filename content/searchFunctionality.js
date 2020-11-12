@@ -1,21 +1,63 @@
-
 function init(){
+  //check if the user is logged in
+  checkLoggedIn();
+  chechContributingUser();//check if they are a contributing user
+
+  //get all buttons and search bars
   let searchBar = document.getElementById("searchBar");
   let searchBtn = document.getElementById("search");
   let logingBtn = document.getElementById('logIn');
+  let addPersonBtn = document.getElementById("addPerson");
   let searchCriteria = document.getElementById("searchCriteria");
+  let addMovieBtn = document.getElementById('addMovie');
+
+  //this is an aesthetics thing, it updates the search bar to display <the search criteria> (i.e., people, movie, etc) followed by an elispses
   searchCriteria.addEventListener("change", () =>{
     document.getElementById("searchBar").placeholder = document.getElementById("searchCriteria").value +"...";
   });
-  searchBtn.addEventListener("click",search)
+
+  //add all the event listeners
+  searchBtn.addEventListener("click",search);
   logingBtn.addEventListener("click", logIn);
-//  searchBar.addEventListener("clicl",autocomplete(searchBar));
+  addMovieBtn.addEventListener("click", addMoviePage);
+  addPersonBtn.addEventListener("click", addPersonPage);
 }
+
+//if the user presses the add person button, take them to the add person page
+function addPersonPage(){
+  let request = new XMLHttpRequest();
+  let queryString = "/addPersonPage?&title=";
+  request.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      //replace the movie with what ever the server returns
+      window.open(queryString, "_self");
+    }
+  }
+  request.open("GET",queryString);
+  request.setRequestHeader('Content-Type',"text/html")
+  request.send();
+}
+//if the user presses the add movie button, take them to the add person page
+function addMoviePage(){
+  let request = new XMLHttpRequest();
+  let queryString = "/addMoviePage";
+  request.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      //replace the movie with what ever the server returns
+      window.open(queryString, "_self");
+    }
+  }
+  request.open("GET",queryString);
+  request.setRequestHeader('Content-Type',"text/html")
+  request.send();
+}
+
 //function that calls server and searches for movie information
 function search(){
   let request = new XMLHttpRequest();
   let searchReq = document.getElementById("searchCriteria").value;
   let queryString;
+  //the following GIANT branching statement is used to set the routes
   //If the dropdop menu is set to title
   if(searchReq === "Title"){
     //if the user entered an id
@@ -27,7 +69,7 @@ function search(){
       queryString = "/movies?"+"&title=" +document.getElementById("searchBar").value + "&pageNum=0";
     }
   //If the dropdown menu is set to person
-  }else if(searchReq == "Person"){
+  }else if(searchReq === "Person"){
     //if the user eneter an ID
     if(/^\d+$/.test(document.getElementById("searchBar").value)){
       //search the database by ID
@@ -36,12 +78,21 @@ function search(){
       //search the database by person name
       queryString = "/people?"+"&name=" + document.getElementById("searchBar").value + "&pageNum=0";
     }
-  }else if(searchReq == "Genre"){
-    queryString = "/genre?&genre=" + document.getElementById("searchBar").value + "&pageNum=0";
-  }else if(searchReq == "Rating"){
-    queryString = "/review?&rating=" + document.getElementById("searchBar").value + "&pageNum=0";
-  }else if (searchReq == "Year") {
-    queryString = "/year?&year=" + document.getElementById("searchBar").value + "&pageNum=0";
+  //If the dropdown menu is set to Genre
+  }else if(searchReq === "Genre"){
+    queryString = "/movies?&genre=" + document.getElementById("searchBar").value + "&pageNum=0";
+  }
+  //If the dropdown menu is set to Rating
+  else if(searchReq === "Rating"){
+    queryString = "/movies?&rating=" + document.getElementById("searchBar").value + "&pageNum=0";
+  }
+  //If the dropdown menu is set to Year
+  else if (searchReq === "Year") {
+    queryString = "/movies?&year=" + document.getElementById("searchBar").value + "&pageNum=0";
+  }
+  //If the dropdown menu is set to user
+  else if (searchReq === "User"){
+    queryString = "/users?&user=" + document.getElementById("searchBar").value + "&pageNum=0";
   }
   request.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
@@ -57,10 +108,15 @@ function search(){
 //redirect to log in page
 function logIn(){
   let request = new XMLHttpRequest();
-  let queryString = "/loginPage"
+  let queryString;
+  if("Back To Account" === document.getElementById('logIn').value){
+    queryString = "/userPage"
+  }else{
+    queryString = "/loginPage"
+  }
   request.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
-      //redirect to that person's page if they're found
+      //replace the movie with what ever the server returns
       window.open(queryString, "_self");
     }
   }
@@ -69,48 +125,41 @@ function logIn(){
   request.send();
 }
 
-/*function autocomplete(textinpt){
-    let request = new XMLHttpRequest();
-    request.onreadystatechange = function(){
-      if(this.readyState == 4 && this.status == 200){
-        let allTitle = JSON.parse(this.response);
-        textinpt.addEventListener("input", function(event){
-          let div1, div2;
-          let value = this.value;
-          closeAllLists();
-          if(!value){return false;}
-          div1 = document.createElement("DIV");
-          div1.setAttribute("id", this.id + "autocomplete-list");
-          div1.setAttribute("class", "autocomplete-items");
-          this.parentNode.appendChild(div1);
-          for(let index = 0; index < allTitle.length; index++){
-            if(allTitle[index].substr(0,value.length).toUpperCase() === value.toUpperCase()){
-              div2 = document.createElement("DIV");
-              div2.innerHTML = "<strong>" + allTitle[index].substr(0,value.length) + "</strong>";
-              div2.innerHTML += allTitle[index].substr(value.length);
-              div2.innerHTML += "<input type = 'hidden' value = '"+allTitle[index]+"'>";
-              div2.addEventListener("click",function(event){
-                textinpt.value = this.getElementByTagName("input")[0].value;
-                closeAllLists();
-              });
-              div1.appendChild(div2);
-            }
-          }
-        });
-        function closeAllLists(element){
-          let x = document.getElementsByClassName("autocomplete-items");
-          for(index in x.length){
-            if(element !== x[index] && element !== textinpt){
-              x[index].parentNode.removeChild(x[index]);
-            }
-          }
-        }
-        document.addEventListener("click", function(event){
-          closeAllLists(event.target);
-        });
-      }
+//this function checks if the user is logged in
+function checkLoggedIn(){
+  let request = new XMLHttpRequest();
+  let queryString = "/checkLoggedIn";
+  request.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      //if they are logged in the "login" button should read "back to account"
+      document.getElementById('logIn').value = "Back To Account";
+    }else{
+      //they aren't log in, the "login" button should read "Login/Sign Up"
+      document.getElementById('logIn').value = "Login/Sign Up";
     }
-    request.open("GET","/movieTitles");
-    request.send();
+  }
+  request.open("GET",queryString);
+  request.setRequestHeader('Content-Type',"text/html")
+  request.send();
 }
-*/
+
+//check if the user, who's logged in, is a contributing user
+function chechContributingUser(){
+  let request = new XMLHttpRequest();
+  let queryString = "/checkContributing";
+  request.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      //if they are, enable the ability to add a movie and person to the database
+      document.getElementById('addMovie').disabled = false;
+      document.getElementById('addPerson').disabled = false;
+    }else{
+      //they aren't a contributing user and thus the add movie and person button should
+      //be disabled
+      document.getElementById('addMovie').disabled = true;
+      document.getElementById('addPerson').disabled = true;
+    }
+  }
+  request.open("GET",queryString);
+  request.setRequestHeader('Content-Type',"text/html")
+  request.send();
+}

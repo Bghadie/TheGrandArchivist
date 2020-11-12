@@ -16,8 +16,9 @@ div{
     background: #879BAF;
     border-radius: 12px;
     box-shadow: 0 4px 6px #000;
-    min-height: 400px;
+    min-height: 600px;
     min-width: 400px;
+    max-height: 1000px;
     height: calc(100vh - 200px);
 }
 h1{
@@ -51,7 +52,7 @@ textFields{
   font-size: 15pt;
   height: 50px;
   padding-left: 10px;
-  
+
 
 }
 myBtns{

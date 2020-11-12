@@ -1,0 +1,31 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  link(rel='stylesheet' href='../layouts/AddStyle.css')
+  title Add Person
+script#script(src='../content/addPersonFunctionality.js' onload='init()' defer='')
+if movieTitle.length > 0
+  h1(title = movieTitle)#title Enter Person for movie: !{movieTitle}
+else
+  h1(title = movieTitle)#title Add person to database
+
+|     To add a person, simply enter their name (one person at a time) and their roll in making this movie
+br
+br
+#bigContainer
+  #container1
+    left
+    p Name:
+    input#name.searchBar(type='text')
+    p Profession:
+    input#profession.searchBar(rows = "10" cols = "50" type='text')
+
+br
+br
+button#addPerson(type='button') Add Person
+br
+br
+br
+#errorMsg
+br
+a#backToSearch(href='http://localhost:3000/') Back to Search

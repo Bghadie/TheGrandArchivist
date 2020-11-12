@@ -6,623 +6,22 @@ const pug = require("pug");
 const {PythonShell} = require('python-shell');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const fromDatabase = require("./content/buisnessLogic");
 //set the port
 const port = 3000;
-
 
 //NOTE Movie id's are any integer from 1 - 999999
 //NOTE people id' are any integer from 1000000+
 //get the movie and people database
 const peopleDatabase = require("./content/peopleDatabase");
 const movieDatabase = require("./content/movieDatabase");
-//const movieDatabase = createmovieDatabase(moviesDataBase); //movie database
-//const peopleDatabase = createpeopleDatabaseWithID(moviesDataBase); //people database
-/* what follows is all the testing code just delete comments to run test*/
-//create some random users
+const allUsers = require("./content/userDatabase");
 
-//NOTE, for simplicity's sake, a users "ID" is their username
-const allUsers ={
-  'IllumaDaddy': {password:"notsafepassy", contributing: false, followingUsers: ["JoestInTime", "John", "James"], followingPeople:["Tom Hanks"],reviews:{"Toy Story":{score: 10, review: "Best movies I've never seen"}},recommendedMovies:[]},
-  'JoestInTime': {password:"somesafepassword", contributing: true, followingUsers: [], followingPeople:["Pete Docter"], reviews:{"Up":{score: 3, review: "s"}},recommendedMovies:[]}
-};
+fromDatabase.addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"}, movieDatabase, allUsers);
+fromDatabase.addReview("IlluaDaddy", "Toy Story", {score:10, review:"YAY"}, movieDatabase, allUsers);
+fromDatabase.addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"}, movieDatabase, allUsers);
+fromDatabase.addReview("JoestInTime", "Toy Story", {score:7, review:"I have watched this movie A LOT. Tom Hanks was great in it but I stil can't freaking stand Tim Allen, the god damn snitch"}, movieDatabase, allUsers);
 
-/****************************************
-*THE FOLLOWING COMMENTED OUT CODE IS for*
-*      TESTING MY BUISNESS LOGIC        *
-*   There are 8 such tests, basically   *
-*  remove the comments of surround any  *
-* given code (I'd do one at a time) and *
-*  run the server to see if they work.  *
-*Feel free to play around with the tests*
-*****************************************/
-
-
-//test 1, Check that reviews can be added:
-
-
-addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"});
-addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"});
-addReview("JoestInTime", "Toy Story", {score:7, review:"YAY"});
-addReview("JoestInTime", "Help!", {score:7, review:"YAY"});
-let id = getIDByTitle(movieDatabase, "Toy Story")
-//console.log(movieDatabase[id]); //Movie toy story should have a review now
-//console.log(allUsers); //IllumaDaddy should have a review for movie with id 0 and 2
-
-
-
-
-//test 2, check that a user can be added:
-/*
-createUser("halfnutella", "IamMarried")//should add user
-createUser("IllumaDaddy", "I already exist")//should not add user
-console.log(allUsers)//print the list of users and confirm
-*/
-
-
-//test 3, check that a movie can be addeds
-/*
-console.log(createMovie("Some Random Movie Title", "Ronald Bass", "Forest Whitaker", "Whitney Houston, Loretta Devine, Lela Rochon")); //add movie
-let id = getIDByTitle(movieDatabase, "Some Random Movie Title")
-console.log(movieDatabase[id]);
-console.log(createMovie("Toy Story", "Ronald Bass", "Forest Whitaker", "Whitney Houston, Loretta")); //try to add movie with invalid entries (e.g., the movie already exists)
-*/
-
-//test 4, make someone a contirbuting user, prints true if user is a valid user
-//and if they are made into contributing user. Prints false otherwise
-/*
-console.log(becomeContributingUser("IllumaDaddy")); //should print true
-console.log(becomeContributingUser("I dont exist")); //should print false
-*/
-
-
-//test 5, make one user follow another
-/*
-console.log(allUsers); //should print unupdated users list
-console.log(followUser("IllumaDaddy", "JoestInTime")); //prints true if both user's exist (should print true)
-console.log(followUser("RobinBanks", "JoestInTime")); //prints true if both user's exist (should print false)
-console.log(allUsers); //should print the updated users list with "IllumaDaddy" now following "JoestInTime"
-*/
-
-//test 6, make one user follow a person
-/*
-console.log(allUsers); //should print unpdated list of users
-console.log(followPeople("IllumaDaddy", "Daniel Radcliffe")); //IllumaDaddy is now following Daniel Radcliffe. Returns True
-console.log(followPeople("IllumaDaddy", "Gwen Stacy"));//returns false Gwen Stacy is not a person in the database
-console.log(followPeople("Paul Rud", "Sean Bean")); // returns false Paul Rud is not a user in the database
-console.log(allUsers);
-*/
-
-//test 7, add person to people database by specifying the persons name
-//if person is in the database already, return false
-/*
-console.log(createPerson("Tom Honks")); //add Tom Honks (should return true)
-console.log(createPerson("Dave Chapelle")); //add Dave Chapelle (should return true as I mispelt his name)
-console.log(createPerson("Izabella Scorupco")); //already in database so won't be added (should return false)
-*/
-
-//test 8, tests adding a person to a movie. The person must be IN the people
-//database for them to be added. So I just created a person called "Nick Suzuki"
-//to act as a test
-/*
-//Try to follow Nick Suzuki, should return false as he is NOT in the database now
-console.log(followPeople("IllumaDaddy", "Nick Suzuki"));
-createPerson("Nick Suzuki"); //create a person
-
-//Try to follow Nick Suzuki, should return true as he is in the database now
-console.log(followPeople("IllumaDaddy", "Nick Suzuki"));
-
-//add that person to a the movie Jumanji under each profession, each will return true
-console.log(addPersonToMovie("Jumanji", "Nick Suzuki", "ACTOR"));
-console.log(addPersonToMovie("Jumanji", "Nick Suzuki", "DIRECTOR"));
-console.log(addPersonToMovie("Jumanji", "Nick Suzuki", "WRITER"));
-
-//Go to localHost:3000 and search Jumanji, he should be in the list now
-
-*/
-/*END OF TESTING CODE */
-
-
-function getListOfReviews(threshold){
-  let matchedMovies = [];
-  let count;
-  let average;
-  Object.keys(movieDatabase).forEach(function(id){
-    sum = 0;
-    if(Object.keys(movieDatabase[id].data.review).length === 0){
-      average = 0;
-    }else{
-      count = Object.keys(movieDatabase[id].data.review).length;
-      for(users of Object.keys(movieDatabase[id].data.review)){
-        sum += movieDatabase[id].data.review[users].score;
-      }
-      average = sum/count
-    }
-    if(average >= threshold){
-      matchedMovies.push(movieDatabase[id]);
-    }
-  });
-  return matchedMovies;
-}
-
-function findMaxYear(){
-  let max = 0;
-  for(id of Object.keys(movieDatabase)){
-    let year = parseInt(movieDatabase[id].data.Year.split("-"));
-    if(year > max){
-      max = year;
-    }
-  }
-  return max;
-}
-
-function findMinYear(){
-  let min = 3005; //some random number
-  for(id of Object.keys(movieDatabase)){
-    let year = parseInt(movieDatabase[id].data.Year.split("-"));
-    if(year < min){
-      min = year;
-    }
-  }
-  return min;
-}
-
-function getAllTitles(){
-  let titles = []
-  Object.keys(movieDatabase).forEach(function(id) {
-    titles.push(movieDatabase[id].data.Title);
-  });
-  return titles;
-}
-
-function findSimilarMovies(partialTitle, pageNum){
-  let similarMovies = [];
-  Object.keys(movieDatabase).forEach(function(id) {
-    if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
-      similarMovies.push(movieDatabase[id]);
-    }
-  });
-  let numberOfItemsPerPage = 50;
-  var start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-  return similarMovies.splice(start,50);
-}
-
-function findMaxPage(partialTitle){
-  let similarMovies = [];
-  Object.keys(movieDatabase).forEach(function(id) {
-    if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
-      similarMovies.push(movieDatabase[id]);
-    }
-  });
-  if(similarMovies.length <=50){
-    return 0;
-  }else{
-    return Math.floor(similarMovies.length/50);
-  }
-}
-function findMaxGenre(genre){
-  let similarGenres = [];
-  if(genre.trim().includes(",")){
-    genre = genre.trim().split(",");
-  }else{
-    genre = genre.trim().split(" ");
-  }
-  for(index in genre){
-    genre[index] = genre[index].trim()
-  }
-  Object.keys(movieDatabase).forEach(function(id){
-    let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
-    for(item in placeHolder){
-      placeHolder[item] = placeHolder[item].trim();
-    }
-    let check = genre.every((value)=>
-      placeHolder.includes(value));
-    if(check){
-      similarGenres.push(movieDatabase[id]);
-    }
-  });
-  if(similarGenres.length <= 50){
-    return 0;
-  }else{
-    return Math.floor(similarGenres.length/50);
-  }
-}
-
-function findGenres(genre, pageNum){
-  let similarGenres = [];
-  if(genre.trim().includes(",")){
-    genre = genre.trim().split(",");
-  }else{
-    genre = genre.trim().split(" ");
-  }
-  for(index in genre){
-    genre[index] = genre[index].trim()
-  }
-  Object.keys(movieDatabase).forEach(function(id){
-    let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
-    for(item in placeHolder){
-      placeHolder[item] = placeHolder[item].trim();
-    }
-    let check = genre.every((value)=>
-      placeHolder.includes(value));
-    if(check){
-      similarGenres.push(movieDatabase[id]);
-    }
-  });
-  let numberOfItemsPerPage = 50;
-  var start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-  return similarGenres.splice(start, 50);
-}
-/*
-Assumption: the function takes a person's name and profession as a string
-NOTE: the profession (i.e., ACTOR, DIRECTOR, or WRITER) should be entered in all caps
-Purpose: Adds a person, if they exist in the database, to a movie. Also updates the person's work history
-Returns: True is succesful false, otherwise
-*/
-function addPersonToMovie(movieTitle, personsName, personsProfession){
-  //get the ID's of the user's input
-  let personsID = getIDByName(peopleDatabase, personsName);
-  let movieTitleID = getIDByTitle(movieDatabase, movieTitle);
-  if(!(personsID && movieTitleID)){
-    //the person isn't in the databse or the movie doesn't exist, return false
-    return false;
-  }
-  //create a person object
-  let personObject = peopleDatabase[personsID]
-  //set the person objects information (e.g., profession and movie they've worked on)
-  personObject.profession = personsProfession;
-  personObject.films = movieTitle;
-
-  //depending on their profession, put the person in the appropriate part of the  movie database
-  if(personsProfession === "ACTOR"){
-    movieDatabase[movieTitleID].data.Actors += (","+personsName);
-  }else if (personsProfession === "DIRECTOR"){
-    movieDatabase[movieTitleID].data.Director += (","+personsName);
-  }else if (personsProfession === "WRITER"){
-    movieDatabase[movieTitleID].data.Writer += (","+personsName);
-  }
-  return true;
-}
-
-/*
-Assumption: the function takes a person's name a string
-Purpose: Creates a person object and gives them an ID then stores them in the database
-Returns: True is succesful false, otherwise
-*/
-function createPerson(personsName){
-  let personID = getIDByName(peopleDatabase, personsName);
-  if(personID){
-    //if the person is already in the database don't add them, return false
-    return false;
-  }
-  //add the person with a unique ID to the database
-  peopleDatabase[Object.keys(peopleDatabase).length + 1000000] = {name:personsName}
-  return true;
-};
-
-
-/*
-Assuption: a movie title, and a string separated by (",") of actor name(s), director name(s), and writer name(s)
-and adds them to a movie object and thus the movie database
-Purpose: Creates a movie entry and adds it to the database
-Returns: True if succesful, false otherwise
-*/
-function createMovie(title, writer, director, actor){
-  //get all the users input into an array
-  let givenWriter = writer.split(",");
-  let givenDirector = director.split(",");
-  let givenActor = actor.split(",");
-  let givenMovieTitles = title.split(",")
-  //declare arrays for all ID's
-  let movieIDs = [];
-  let writerIDs = [];
-  let directorIDs = [];
-  let actorIDs = [];
-  //loop through every user inputted and store the IDs in the ID arrays
-  for(writers of givenWriter){
-    if(getIDByName(peopleDatabase, writers.trim())){
-      writerIDs.push(getIDByName(peopleDatabase, writers.trim()));
-    }
-  }
-  for(directors of givenDirector){
-    if(getIDByName(peopleDatabase, directors.trim())){
-      directorIDs.push(getIDByName(peopleDatabase, directors.trim()));
-    }
-  }
-  for(actor of givenActor){
-    if(getIDByName(peopleDatabase, actor.trim())){
-      actorIDs.push(getIDByName(peopleDatabase, actor.trim()));
-    }
-  }
-  for(films of givenMovieTitles){
-    if(getIDByTitle(movieDatabase, title.trim())){
-      movieIDs.push(getIDByTitle(movieDatabase, title.trim()));
-    }
-  }
-  if(writerIDs.length === 0 || directorIDs.length === 0 || actorIDs.length === 0 || movieIDs.length > 0){
-   //Validation checks. If:
-      //user didn't entered at least one writer, actor, and directors
-      //user entered a movie that was already in the moviesDataBase
-      //return false
-    return false;
-  }
-  //get a unique ID
-  let id = Object.keys(movieDatabase).length;
-  //att the movie to the database
-  movieDatabase[id] = {data:{Title:title, Writer:writer, Director:director,Actors:actor}};
-  return true;
-};
-
-/*
-Assumption: the function takes a username as a string
-Purpose: sets a user to be a contributing user
-Returns true if succesful, false otherwise
-*/
-function becomeContributingUser(requestingUser){
-  //if the calling user is in the database make them a contributing user
-  if(getIDByUsername(allUsers, requestingUser)){
-    allUsers[requestingUser].contributing = true;
-    return true;
-  }else{
-    return false;
-  }
-};
-
-/*
-Assumption: the function takes a username as a string
-Purpose: sets a user to be a regular user
-Returns true if succesful, false otherwise
-*/
-function becomeRegularUser(requestingUser){
-  //if the calling user is in the database make them a regular user
-  if(getIDByUsername(allUsers, requestingUser)){
-    allUsers[requestingUser].contributing = false;
-    return true;
-  }else{
-    return false;
-  }
-};
-
-/*
-Assumption: the function is taking two usernames as strings
-Purpose: adds a user to the calling user's following list
-Returns true if succesful, false otherwise
-*/
-function followUser(requestingUser, userToFollow){
-  //get both user's ID's
-  let requestingUserID = getIDByUsername(allUsers, requestingUser);
-  let userToFollowID = getIDByUsername(allUsers, userToFollow);
-  //if either are not in the database, return false
-  if(!(requestingUserID && userToFollowID)){
-    return false;
-  }
-  //otherwise push the userTofollow into the calling user's follow list
-  allUsers[requestingUser].followingUsers.push(userToFollowID);
-  return true;
-
-
-};
-
-/*
-Assumption: the function is taking a username and the name of the person to follow as strings
-Purpose: adds a person to the calling user's following list
-Returns true if succesful, false otherwise
-*/
-function followPeople(requestingUser, personToFollow){
-  //get the user and person's ID
-  let requestingUserID = getIDByUsername(allUsers, requestingUser);
-  let personToFollowID = getIDByName(peopleDatabase, personToFollow);
-  //if either doesn't exist in the databse, return false
-  if(!(requestingUserID && personToFollowID)){
-    return false;
-  }
-  //otherwise push the personToFollow into the calling's user's follow list
-  allUsers[requestingUser].followingPeople.push(personToFollowID);
-  return true;
-};
-
-/*
-Assuption: the function takes a username and password as a string. If the username doesn't exist,
-it add's the user
-Purpsoe: create a user with the specified username and ID
-Returns true if succesful, false otherwise
-*/
-function createUser(requestingUser, pass){
-  //if the username is already in the database return false
-  if(getIDByUsername(allUsers, requestingUser)){
-    return false;
-  }
-  //create the user and add them to the all user's list
-  allUsers[requestingUser] = {password:pass}
-  //set them to regular user by defauls
-  allUsers[requestingUser].contributing = false;
-  return true;
-};
-
-
-/*
-Assuption: the function takes a username as a string, a movie name as a string, and a review object (e.g., a number and a review)
-Purpose: adds a review to a movie
-Returns true if succesful, false otherwise
-*/
-function addReview(requestingUser, movie, review){
-  //get the movie ID and usernameID
-  movieID = getIDByTitle(movieDatabase, movie);
-  userID = getIDByUsername(allUsers, requestingUser);
-  //if the user or movie don't exist, return false
-  if(!movieID || !userID){
-    return false;
-  }
-  //add the review to the movie in the moviedatabase
-  movieDatabase[movieID].data.review[requestingUser] = review;
-  //add the review to the user in the user database
-  allUsers[userID].reviews[movieDatabase[movieID].data.Title] = review;
-  return true;
-};
-
-//Assumption: some person object and some list
-//Purpose: checks to see if a person is stored in a list
-//Returns true if succesful, false otherwise
-function containsObject(person, list){
-  //iterate over the list items
-  for(item in list){
-    //if the list contains an entry that matches the provided person's name and professions
-    //return true
-    if(person.name === list[item].name && person.profession === list[item].profession){
-      return true;
-    }
-  }
-  //the person isn't in the list return false
-  return false;
-}
-
-
-//Assumption: some person object
-//Purpose: removes paratheses from a writers name
-//Returns The person object without paratheses (some writer names have paraentheses in them)
-function removePara(personObj){
-  //create an empty name string
-  let newName = ""
-  //iterate over the letter indexes of the person objects name
-  for(letters in personObj.name){
-    //check each letter and if its a parentheses quit the loop
-    if(personObj.name[letters] === "("){
-      break;
-    }
-    //append the letter to the empty name string
-    newName+=personObj.name[letters];
-  }
-  //set the person object's name to the edited name
-  personObj.name = newName.trim();
-  //return the person object
-  return personObj;
-}
-
-//Assumption: some person name
-//Purpose: removes paratheses from a writers name
-//Returns The person object without paratheses (some writer names have paraentheses in them)
-function removePara(name){
-  //create an empty name string
-  let newName = ""
-  //iterate over the letter indexes of the person objects name
-  for(letters in name){
-    //check each letter and if its a parentheses quit the loop
-    if(name[letters] === "("){
-      break;
-    }
-    //append the letter to the empty name string
-    newName+=name[letters];
-  }
-  //return the person object
-  return newName;
-}
-
-
-//Assumptions: takes the approrpaite value (e.g., title as a string, username as a string, and person name as a string)
-//and the object that the value should be stored in (e.g., a database)
-//Purpose: finds the key of a specific value in a database
-//Returns: the key if its found, otherwise null
-//NOTE this way, by calling these helper functions I will either get the Key I need or
-//get null, making it perfect for branching structures
-function getIDByTitle(object, value) {
-  return Object.keys(object).find(key => JSON.stringify(object[key].data.Title.toUpperCase()) === JSON.stringify(value.toUpperCase()));
-}
-function getIDByUsername(object, value) {
-  return Object.keys(object).find(key => JSON.stringify(key.toUpperCase()) === JSON.stringify(value.toUpperCase()));
-}
-function getIDByName(object, value) {
-  return Object.keys(object).find(key => JSON.stringify(object[key].name.toUpperCase()) === JSON.stringify(value.toUpperCase()));
-}
-
-//Assumption, takes some ID and a flag
-//Purpose: checks to see if the ID the user is looking for is valid
-//Returns true if succesful, false otherwise
-//NOTE this function is used for when a user enters an ID when searching for a movie/person
-//Therefore, it checks to make sure that the user entered a valid ID
-//The flag tells the program whether the ID belongs to a movie (1), person (2) or user (3)
-function isValidId(someID, flag){
-  //check if movie ID is valid
-  if(flag === 1){
-    if(Object.keys(movieDatabase).length > someID){
-      return true;
-    }else{
-      return false;
-    }
-  }
-  //check if person ID is valid
-  if(flag === 2){
-    if((Object.keys(peopleDatabase).length+1000000) > someID && someID >= 1000000){
-      return true;
-    }else{
-      return false;
-    }
-  }
-  //check if username is valid
-  if(flag === 3){
-    if(getIDByUsername(allUsers, someID)){
-      return true;
-    }else{
-      return false;
-    }
-  }
-}
-
-
-
-//Assumptions: takes some object of objects list
-//Purpose: sorts the object of objects list by their values
-//Returns: the sorted array
-function sortArray(someObjectList){
-  let keyArray = Object.keys(someObjectList);
-  let fixedSort = keyArray.sort((a,b)=>{
-    //this is my specified sort function
-    if(someObjectList[a] > someObjectList[b]){
-      return 1;
-    }
-    return -1;
-  });
-  return fixedSort
-}
-
-//Assumptions: the function takes a person's name as a string
-//Purpose: finds all the films the person has worked on
-//Returns: returns a list of all the films the person has worked on
-function findWork(name){
-  let id = getIDByName(peopleDatabase, name);
-  let arrayOfWork = [];
-  //return the list of films the person has worked on
-  for(works of peopleDatabase[id].films.split(",")){
-    if(!(arrayOfWork.includes(works))){
-      arrayOfWork.push(works);
-    }
-  }
-  return arrayOfWork;
-}
-
-//Assumptions: takes the name of a person as a string and a person's database
-//Purpose: checks to see if a person worked on a particular movie. If they have
-//Go through every profession and store each person in that profession in an object array
-//Also keep track of how many times the person given to the function has worked with each person
-//basically, the object looks like {nameOfCoworker:numberOfTimesWorkedWith}
-//Returns: an object of all the peron's coworkers and how many times they have worked together
-function findCoworker(personDatabase, name){
-  array = {};
-  for(key of Object.keys(movieDatabase)){
-    for(works of personDatabase){
-        if(movieDatabase[key].data.Title === works){
-          for(actors of movieDatabase[key].data.Actors.split(",")){
-            array[actors] = array[actors] ? array[actors]+1 : 1;
-          }
-          for(directors of movieDatabase[key].data.Director.split(",")){
-            array[directors] = array[directors]?array[directors]+1:1;
-          }
-          for(writers of movieDatabase[key].data.Writer.split(",")){
-            array[writers] = array[writers]?array[writers]+1:1;
-          }
-        }
-    }
-  }
-  return array;
-}
 
 function auth(req,res,next){
   if(!req.session.loggedIn){
@@ -666,122 +65,136 @@ app.get("/", (req, res) => {
   res.render("HomePage",{});
 });
 
-app.get("/movieTitles", (req, res) =>{
-  let allTitles = getAllTitles();
-  res.write(JSON.stringify(allTitles));
-  res.end();
-});
-
-app.get("/movies", (req, res) =>{
-  let movie = getIDByTitle(movieDatabase,req.query.title); //basically a flag variable
-  //if the movie is in the database, render it otherwise render a random movie
-  if(movie){
-    res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
-  }else{
-    let moviesByTitle = findSimilarMovies(req.query.title.toUpperCase(), parseInt(req.query.pageNum));
-    if(moviesByTitle.length > 0 && req.query.title !== ""){
-      res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": req.query.title});
+//this is my movie route. It does a check and, depending on the result
+//will send a specific response
+app.get("/movies", (req, res, next) =>{
+  //if the client is looking for a movie title do the following
+  if(req.query.title || req.query.title ===""){
+    let movie = fromDatabase.getIDByTitle(req.query.title); //basically a flag variable
+    //if the movie is in the database, render it
+    if(movie){
+      res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
     }else{
-      res.statusCode = 404;
-      res.end();
+      //get all movies that match the search criteria and render the movie
+      let moviesByTitle = fromDatabase.findSimilarMovies(req.query.title.toUpperCase(), parseInt(req.query.pageNum),movieDatabase);
+      if(req.query.title === ""){
+        //set the search criteria to all movies
+        res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": "All Movies"});
+      }else{
+        //set the search criteria to the search criteria
+        res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": req.query.title});
+      }
     }
+  }else{
+    next();//they aren't looking for a movie title, call next
   }
-});
-app.get("/movies:id", (req, res) =>{
-  let id = parseInt(req.query.id); //get the ID the user searched for
-  if(isValidId(id, 1)){ //check if its a valid ID
-    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
-  }
-});
-app.get("/people", (req,res)=>{
-  let queryName = removePara(req.query.name); //get the name the user entered
-  if(getIDByName(peopleDatabase, queryName.trim())){
-    let id = getIDByName(peopleDatabase, queryName.trim()); //get the person's ID
-    let allWork = findWork(queryName.trim())
-    let profession = peopleDatabase[id].profession; //get their profession
-    let sortAllCollabs = sortArray(findCoworker(allWork, queryName)); //sort their collaboration by most frequent
-    //render the page
-    res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
-  }
-});
-app.get("/people:id", (req,res)=>{
-  let id = parseInt(req.query.id); //convert the ID into an int
-  if(isValidId(id,2)){ //check that its valid
-    console.log(id)
-    let profession = peopleDatabase[id].profession; //get their profession
-    let allWork = findWork(peopleDatabase[id].name.trim())
-    let sortAllCollabs = sortArray(findCoworker(allWork, peopleDatabase[id].name)); //sort their collaboration by most frequent
-    //render the page
-    res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
-  }
-});
-
-app.get("/genre", (req,res) =>{
-  let listOfMovies = findGenres(req.query.genre.toUpperCase(), parseInt(req.query.pageNum));
-  if(listOfMovies){
-    if(listOfMovies.length > 0){
+}, (req,res,next) =>{
+  //if the client is looking for a genre
+  if(req.query.genre || req.query.genre ===""){
+    //get all genres that match the search criteria
+    let listOfMovies = fromDatabase.findGenres(req.query.genre.toUpperCase(), parseInt(req.query.pageNum),movieDatabase);
+    //if the user entered nothing, all movies match
+    if(req.query.genre === ""){
+      //render the list of movies
+      res.render("ViewGenre",{"someMovies":listOfMovies, "searchCriteria": "All Genres"});
+    }else{
+      //render the list of movies that match the search criteria
       res.render("ViewGenre",{"someMovies":listOfMovies, "searchCriteria": req.query.genre});
-    }else{
-      res.statusCode = 404;
-      res.end();
     }
   }else{
-    res.statusCode = 404;
-    res.end();
+    next(); //they aren't looking for a genre either, call next
   }
-});
-
-app.get("/review",(req,res) =>{
-  let threshold = parseFloat(req.query.rating);
+}, (req,res,next) =>{
+  //if the client is looking for a year
+  if(req.query.year || req.query.year === ""){
+    let criteria = parseInt(req.query.year);//store the minimum year they want
+    //get all movies that match the search criteria and render it
+    let matchedMovies = fromDatabase.getMoviesByYear(criteria, req.query.pageNum);
+    res.render("ViewMovieList",{"someMovies":matchedMovies[0], "searchCriteria": matchedMovies[1]});
+  }else{
+    next(); //they aren't looking for a year either, call next
+  }
+},(req,res) =>{
+  let threshold = parseFloat(req.query.rating); //get the threshold
+  //if the threshold is valid
   if(threshold >=0){
-    let matchedMovies = getListOfReviews(threshold);
+    //get all movies who's average rating are at or above the threshold and render it
+    let matchedMovies = fromDatabase.getListOfReviews(threshold, movieDatabase);
     let criteria = "Movies with Rating of at least " + threshold
     let numberOfItemsPerPage = 50;
     let start = ((parseInt(req.query.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
     res.render("ViewMovieList",{"someMovies":matchedMovies.splice(start,50), "searchCriteria": criteria});
   }else{
-    res.statusCode = 404;
-    res.end();
+    //its not a valid threshold, send an error
+    res.status(404).send();
   }
 });
-app.get("/year",(req,res) =>{
-  let threshold = parseInt(req.query.year);
-  let minimumYear = findMinYear();
-  let maximumYear = findMaxYear();
-  let matchedMovies = [];
-  let criteria;
-  if(threshold >= minimumYear && threshold <= maximumYear){
-    Object.keys(movieDatabase).forEach(function(id){
-      let year = parseInt(movieDatabase[id].data.Year.split("–"));
-      if(year === threshold){
-        matchedMovies.push(movieDatabase[id]);
-      }
-    });
-   criteria = threshold
+
+//this function searchs for a movie by a given ID
+app.get("/movies:id", (req, res) =>{
+  let id = parseInt(req.query.id); //get the ID the user searched for
+  if(fromDatabase.isValidId(id, 1,movieDatabase)){ //check if its a valid ID
+    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+  }
+});
+
+//this is my person route. It does a check and, depending on the result
+//will send a specific response
+app.get("/people", (req,res,next)=>{
+  let queryName = fromDatabase.removePara(req.query.name); //get the name the user entered
+  if(fromDatabase.getIDByName(queryName.trim())){//if the person exists in the database
+    let id = fromDatabase.getIDByName(queryName.trim()); //get the person's ID
+    let allWork = fromDatabase.sortRecentWork(fromDatabase.findWork(queryName.trim(),peopleDatabase)) //get all their work and sort it from more to least recent
+    let profession = peopleDatabase[id].profession; //get their profession
+    let sortAllCollabs = fromDatabase.sortArray(fromDatabase.findCoworker(allWork, queryName,movieDatabase)); //sort their collaboration by most frequent
+    //render the page
+    res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
   }else{
-    Object.keys(movieDatabase).forEach(function(id){
-      matchedMovies.push(movieDatabase[id]);
-    });
-    criteria = "Any Year"
+    next();//the person doesn't exist in the database, call next
   }
-  let numberOfItemsPerPage = 50;
-  let start = ((parseInt(req.query.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-  res.render("ViewMovieList",{"someMovies":matchedMovies.splice(start,50), "searchCriteria": criteria});
-
 });
+app.get("/people", (req,res)=>{
+  let queryName = fromDatabase.removePara(req.query.name); //get the name the user entered
+  let pageNum = req.query.pageNum;//get the current page number (0 by default)
+  if(queryName === ""){//if the user entered nothing, all people in the database should match.
+    //render all matching people
+    res.render("ViewPeople",{"somePeople":fromDatabase.allPeople(pageNum, peopleDatabase), "searchCriteria": "Everybody"});
+  }else{
+    //get a list of all people that match the search criteria
+    let listOfPeople = fromDatabase.findSimilarPeople(queryName, parseInt(pageNum), peopleDatabase);
+    //render all matching people
+    res.render("ViewPeople",{"somePeople":listOfPeople, "searchCriteria": queryName});
+  }
+});
+//this function searchs for a person by a given ID
+app.get("/people:id", (req,res)=>{
+  let id = parseInt(req.query.id); //convert the ID into an int
+  if(fromDatabase.isValidId(id,2,peopleDatabase)){ //check that its valid
+    let profession = peopleDatabase[id].profession; //get their profession
+    let allWork = fromDatabase.findWork(peopleDatabase[id].name.trim(),peopleDatabase) //get all their work and sort it by most recent
+    let sortAllCollabs = fromDatabase.sortArray(fromDatabase.findCoworker(allWork, peopleDatabase[id].name,movieDatabase)); //sort their collaboration by most frequent
+    //render the page
+    res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
+  }
+});
+
+//this function finds the maximum pages need to display all movies that meet the serached criteria
 app.get("/findMaxPageMovie", (req,res) =>{
-  let maxPageNum = findMaxPage(req.query.title.toUpperCase());
-  res.end(maxPageNum.toString());
-});
-app.get("/findMaxPageGenre", (req,res) =>{
-  let maxPageNum = findMaxGenre(req.query.genre.toUpperCase());
-  res.end(maxPageNum.toString());
+  let maxPageNum = fromDatabase.findMaxPage(req.query.title.toUpperCase(),movieDatabase);
+  res.send(maxPageNum.toString());
 });
 
+//this function finds the maximum pages need to display all genres that meet the serached criteria
+app.get("/findMaxPageGenre", (req,res) =>{
+  let maxPageNum = fromDatabase.findMaxGenre(req.query.genre.toUpperCase(),movieDatabase);
+  res.send(maxPageNum.toString());
+});
+
+//this function finds the maximum pages need to display all years that meet the serached criteria
 app.get("/findMaxPageYear", (req,res) =>{
   let threshold = parseInt(req.query.year);
-  let minimumYear = findMinYear();
-  let maximumYear = findMaxYear();
+  let minimumYear = fromDatabase.findMinYear(movieDatabase);
+  let maximumYear = fromDatabase.findMaxYear(movieDatabase);
   let matchedMovies = [];
   let criteria;
   if(threshold >= minimumYear && threshold <= maximumYear){
@@ -797,22 +210,29 @@ app.get("/findMaxPageYear", (req,res) =>{
     });
   }
   if(matchedMovies.length <=50){
-    res.end("0");
+    res.send("0");
   }else{
     let maxPage = Math.floor((matchedMovies.length)/50);
-    res.end(maxPage.toString());
+    res.send(maxPage.toString());
   }
 });
 
+//this function finds the maximum pages need to display all movies that meet the minimum average rating
 app.get("/findMaxPageRating", (req,res) =>{
   let threshold = parseFloat(req.query.rating);
-  let matchedMovies = getListOfReviews(threshold);
+  let matchedMovies = fromDatabase.getListOfReviews(threshold,movieDatabase);
   if(matchedMovies.length <=50){
-    res.end("0");
+    res.send("0");
   }else{
     let maxPage = Math.floor((matchedMovies.length)/50);
-    res.end(maxPage.toString());
+    res.send(maxPage.toString());
   }
+});
+
+//this function finds the maximum pages need to display all people that meet the serached criteria
+app.get("/findMaxPagePeople?", (req,res) =>{
+  let maxPageNum = fromDatabase.findMaxPeople(req.query.name,peopleDatabase);
+  res.send(maxPageNum.toString());
 });
 
 /*
@@ -820,25 +240,32 @@ shout out to:
 https://github.com/extrabacon/python-shell
 allowed me to create a shell to run my python script
 Assumption: takes a string consisting of MovieTitle,MovieYear as an argument
+It gets a list of all similar movies based off my algorithm (see movieRecommender.py)
 */
 app.get("/recommendMovieGeneral",(req, res) =>{
-  let someString = req.query.info;
-  let movieExists = getIDByTitle(movieDatabase, someString.split(",")[0]);
-  if(movieExists){
+  let someString = req.query.info;//get the serch criteria
+  let movieExists = fromDatabase.getIDByTitle(someString.split(",")[0]); //make sure the movie exists
+  if(movieExists){//if the movie exists
+    //start a python shell to run the movieRecommender script
     let pyshell = new PythonShell("movieRecommender.py");
-    pyshell.send(someString)
+    pyshell.send(someString)//send the search criteria to the script as an argv
     pyshell.on('message', function(message){
-      let arr = message.split("|").filter(function(e){
-        return e !== "";
+      //this takes the response and parses it into something readable
+      //note, the response is taken from what ever the python script prints
+      let arr = message.split("|").filter(function(e){//split the response from the script by | character
+        return e !== "";//get each individual movie title
       });
       let movieObjs = []
       for(titles of arr){
-        movieObjs.push(movieDatabase[getIDByTitle(movieDatabase,titles)].data);
+        movieObjs.push(movieDatabase[fromDatabase.getIDByTitle(titles)].data);//push each movie object into the placeholder array
       }
+      //render the recomended movies
       res.render("ReccMovieGen", {"someMovies":movieObjs});
     });
+    //end the python shell
     pyshell.end(function(err,code,signal){
       //these exist for testing purposes
+
     /*  console.log('The exit code was: ' + code);
       console.log('The exit signal was: ' + signal);
       console.log('finished');*/
@@ -846,68 +273,298 @@ app.get("/recommendMovieGeneral",(req, res) =>{
   }
 });
 
-
+//this function creates a user and adds them to the database
 app.post("/createAccount", (req, res) =>{
-  let reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*]{10,}$/;
   let username= req.body.username;
   let password = req.body.password;
-  let isValidPass = reg.test(password);
   //if username isn't valid dispaly error message
-  if(username.length == 0){
-    res.statusCode = 440; //entered an invalid username
-    res.end()
-  }else if(getIDByUsername(allUsers, username)){
-    res.statusCode = 441; //user already exists
-    res.end()
-  }else if(!isValidPass){ //if password isn't valid display error message
-    res.statusCode = 442; //invalid password
-    res.end()
+  if(username.length === 0){
+    res.status(440).send();//entered an invalid username
+  }else if(fromDatabase.getIDByUsername(username)){
+    res.status(441).send(); //user already exists
+  }else if(!fromDatabase.isValidPass(password)){ //if password isn't valid display error message
+    res.status(442).send();//invalid password
   }else{
-    allUsers[username] = {password:password, contributing: false, followingUsers: [], followingPeople:[], recommendedMovies:[],reviews:{}};
-    req.session.username = getIDByUsername(allUsers, username);
+    //create the user, add them to the database, and update the session
+    fromDatabase.createUser(username, password, allUsers);
     req.session.loggedIn = true;
     req.session.username = username;
     res.send();
   }
 });
 
-app.get("/userPage", auth ,(req,res)=>{
-  res.render("ViewUsers",{"someUser":allUsers[req.query.username], "name": req.query.username});
+//this function handles clients searching for users
+app.get("/users", (req,res,next)=>{
+  //if the user searched for is in the database
+  if(fromDatabase.getIDByUsername(req.query.user)){
+    //render the user's page
+    res.render("ViewUsers",{"someUser":allUsers[req.query.user], "name": req.query.user});
+  }else{
+    next(); //call next and get all user's that match the search criteria
+  }
+}, (req, res) =>{
+  //get all matches to the search criteria
+  let similarUsers = fromDatabase.findSimilarUsers(req.query.user,parseInt(req.query.pageNum));
+  if(req.query.user === ""){//all usernames should match so render everyons
+    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": "All Users"});
+  }else{
+    //render all search matches
+    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": req.query.user});
+  }
 });
+
+//this function finds the maximum pages need to display all users that meet the serached criteria
+app.get("/findMaxPageUser?", (req,res) =>{
+  let maxPageNum = fromDatabase.findMaxUsers(req.query.user,allUsers);
+  res.send(maxPageNum.toString());
+});
+
+//this function redirects the user to the user page
+app.get("/userPage", auth ,(req,res)=>{
+  res.render("ViewUsers",{"someUser":allUsers[req.session.username], "name": req.session.username});
+});
+
+//this function redirects the user to the login page
 app.get("/loginPage", (req, res) =>{
   res.render("ViewLoginPage",{});
 });
+
+//this function logs a user in. Notice it uses a post request to try to keep
+//the passowrd being sent secure
 app.post("/loginUser", (req, res) =>{
   let username= req.body.username;
   let password = req.body.password;
-  if(getIDByUsername(allUsers, username)){
+  if(fromDatabase.getIDByUsername(username)){
     if(allUsers[username].password === password){
+      //the user is logged in, set current sessoin accordingly
       req.session.loggedIn = true;
       req.session.username = username;
       res.send();
     }else{
-      res.statusCode = 442; //invalid password
-      res.end()
+      res.status(442).send(); //invalid password
     }
   }else{
-    res.statusCode = 440; //entered an invalid username
-    res.end()
+    res.status(440).send(); //entered an invalid username
   }
 });
-app.get("/logout", auth, (req, res)=>{
+//this function logs a user out by destroying the current session
+app.get("/logout", (req, res)=>{
   req.session.destroy();
   res.render("HomePage",{});
 });
-app.get("/checkCurrUser",auth,(req, res)=>{
-  if(req.session.username === req.query.user){
-    res.statusCode = 200;
-    res.end();
-  }else{
-    res.statusCode = 430
-    res.end();
-  }
-})
 
+//this function checks if a user is logged in
+app.get("/checkLoggedIn", auth, (req,res) =>{
+  res.send();
+});
+
+//this function checks if the current logged in user is following a person
+app.get("/checkIfFollowing",auth,(req,res)=>{
+  if(allUsers[req.session.username].followingPeople.includes(req.query.name.trim())){
+    res.send();
+  }else{
+  res.status(460).send();
+  }
+});
+
+//this function checks for any alerts that need to be handled
+app.get("/checkForAlerts", (req,res) =>{
+  res.send(JSON.stringify({alerts:fromDatabase.handleAlerts(req.session.username, allUsers)}));
+});
+
+//this function is called when viewing the user's page. It checks if the current
+//user is visiting their own pag
+app.get("/checkCurrUser",(req, res)=>{
+  if(req.session.username === req.query.user){
+    res.send();//they are visiting their own page
+  }else{
+    res.status(430).send();//this error code means that they are on another user's page
+  }
+});
+
+//this function checks if a user is a contributing user
+app.get("/checkContributing",auth,(req, res)=>{
+  if(allUsers[req.session.username].contributing){
+    res.send();
+  }
+});
+
+//this function checks if the calling user if following some other user
+app.get("/isFollowingUser",auth,(req, res)=>{
+  if(allUsers[req.session.username].followingUsers.includes(req.query.user)){
+    res.send(); //they are following the user
+  }else{
+    res.status(470).send();//they aren't following the user, send an error code
+  }
+});
+
+//this function toggles the user (contributing/regular) usertype
+app.get("/switchUserType",auth,(req, res)=>{
+  fromDatabase.changeUserType(req.session.username);
+  res.send();
+});
+
+//this redirects the user to the page that lets them add movies to the database
+app.get("/addMoviePage",(req, res)=>{
+  res.render("ViewAddMovie",{"someUser":allUsers[req.query.username], "name": req.query.username});
+});
+//this redirects the user to the page that lets them add revies to the movie
+app.get("/addReviewPage",auth,(req, res)=>{
+  res.render("ViewAddReview",{someUser: req.session.username, movieTitle:req.query.title});
+});
+
+//this function adds a review to the database
+app.post("/addReview",auth,(req, res)=>{
+  if(parseInt(req.body.score) <= 10 && parseInt(req.body.score) >= 0){
+    if((req.body.review === "" && req.body.summary !== "") || (req.body.review !== "" && req.body.summary === "")){
+      res.status(481).send();//the user did not enter a valid full review
+    }else{
+      //create the review object with the post body information
+      fromDatabase.addReview(req.session.username, req.query.title.trim(),
+        {score:req.body.score, review:req.body.review, summary:req.body.summary},
+        movieDatabase, allUsers);
+        //add the review to the movie
+      fromDatabase.addAlertConcerningUser(req.session.username, req.query.title.trim(), allUsers);
+      res.send()
+    }
+  }else{
+    res.status(480).send(); //the user entered a value exceeding the valid range (0-10)
+  }
+});
+
+//this redirects the user to the page that lets them add people to the database/movie
+app.get("/addPersonPage",auth,(req, res)=>{
+  res.render("ViewAddPerson",{someUser: req.session.username, movieTitle:req.query.title});
+});
+
+//this method adds a person to a movie
+app.post("/addPersonToMovie",auth,(req, res)=>{
+  if(fromDatabase.getIDByName(req.body.name.trim())){
+    if(req.body.profession.trim().toUpperCase() !== "ACTOR" && req.body.profession.trim().toUpperCase() !== "DIRECTOR" && req.body.profession.trim().toUpperCase() !== "WRITER"){
+      res.status(491).send();//the person entered an invalid role (i.e., actor, director, writer)
+    }else{
+      //add the person and handle any alerts to users that need to be sent
+      fromDatabase.addPersonToMovie(req.query.title, req.body.name.trim(), req.body.profession.trim().toUpperCase(), movieDatabase, peopleDatabase)
+      fromDatabase.addAlertConcerningPerson(req.body.name.trim(),req.query.title, req.body.profession.trim(), allUsers);
+      res.send();
+    }
+  }else{
+    res.status(490).send(); //the person doesn't exist in the database
+  }
+});
+
+//this method adds a person to the database
+app.post("/addPersonToDatabase",auth,(req, res)=>{
+  if(fromDatabase.getIDByName(req.body.name.trim()) || req.body.name === ""){
+    res.status(492).send(); //the person already exists in the databasse
+  }else{
+    if(req.body.profession.trim().toUpperCase() !== "ACTOR" && req.body.profession.trim().toUpperCase() !== "DIRECTOR" && req.body.profession.trim().toUpperCase() !== "WRITER"){
+      res.status(491).send(); //the user entered an invalid role (i.e., actor, director, writer)
+    }else{
+      //everything is good, add the user to the database
+      fromDatabase.createPerson(req.body.name.trim(), req.body.profession.toUpperCase().trim(), "", movieDatabase, peopleDatabase);
+      res.send();
+    }
+  }
+});
+
+//not gonna get into it, this function just auto generates x movies to be addded
+//(where x is the iteration )
+
+app.post("/addMovie:auto",auth,(req, res)=>{
+  //createMovie(title, writer, director, actor, movieDatabase, peopleDatabase)
+  let iteration = parseInt(req.body.auto);
+  for(let i = 0; i < iteration; i++){
+    let actors = ""
+    let writers = ""
+    let randomTitleIndex = Math.floor(Math.random()*fromDatabase.randomMoiveTitles.length);
+    let randomGenreIndex = Math.floor(Math.random()*fromDatabase.randomGenres.length);
+    let randomDirectorIndex = Math.floor((Math.random()*Object.keys(peopleDatabase).length)+1000000);
+    for(let j = 0; j < 5; j++){
+      let randomActorIndex = Math.floor((Math.random()*Object.keys(peopleDatabase).length)+1000000);
+      actors += peopleDatabase[randomActorIndex].name+","
+    }
+    for(let j = 0; j < 3;j++){
+      let randomWriterIndex = Math.floor((Math.random()*Object.keys(peopleDatabase).length)+1000000);
+      writers += peopleDatabase[randomWriterIndex].name+","
+    }
+    fromDatabase.createMovie(fromDatabase.randomMoiveTitles[randomTitleIndex],
+      writers, peopleDatabase[randomDirectorIndex].name,
+      actors);
+    let addedMovieId = fromDatabase.getIDByTitle(fromDatabase.randomMoiveTitles[randomTitleIndex]);
+    movieDatabase[addedMovieId].data.Genre = fromDatabase.randomGenres[randomGenreIndex];
+    movieDatabase[addedMovieId].data.Runtime = Math.floor(Math.random()*360 + 120) + " min"
+    console.log(movieDatabase[addedMovieId].data.Title)
+  }
+  res.send();
+});
+
+//this post method adds a movie tot he database
+app.post("/addMovie",(req, res)=>{
+    //get all data sent by the client
+    let title, actor, director, writer, year, summary, genre, runtime;
+    title = req.body.title;
+    actor = req.body.actor;
+    director = req.body.director;
+    writer = req.body.writer;
+    year = req.body.year;
+    summary = req.body.summary;
+    runtime = req.body.runtime;
+    genre = req.body.genre;
+    //try to add the movie to the database. If it can be added (all valid entries)
+    if(fromDatabase.createMovie(title, writer, director, actor, movieDatabase, peopleDatabase, allUsers)){
+      //don't forget to set the year, runtime, and genre
+      if(parseInt(year)){
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = year;
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Year = year;
+      }else{
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
+      }
+      if(parseInt(runtime)){
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = runtime + " min";
+      }else{
+        movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = "";
+
+      }
+      movieDatabase[fromDatabase.getIDByTitle(title)].data.Genre = genre;
+      movieDatabase[fromDatabase.getIDByTitle(title)].data.Plot = summary;
+      res.send();
+    }else{
+      if(fromDatabase.getIDByTitle(title)){
+        //if the movie already exists send the correct error code
+        res.status(451).send();
+      }else{
+        //the user must have entered someone who wasn't in the database, send the
+        //appropriate error code
+        res.status(452).send();
+      }
+    }
+});
+
+//toggle wether or not the client calling this route follows the person
+app.get("/followPerson", (req, res) =>{
+  let person = req.query.name.trim();
+  let user = req.session.username;
+  let checked = req.query.flag;
+  if(checked === "checked"){
+    fromDatabase.followPeople(user, person, peopleDatabase, allUsers);
+  }else{
+    fromDatabase.unfollowPerson(user, person, peopleDatabase, allUsers);
+  }
+});
+
+//toggle wether or not the client calling this route follows the user
+app.get("/followUnfollowUser", (req, res) =>{
+  if(req.query.follow === "Follow"){
+    fromDatabase.followUser(req.session.username, req.query.user, allUsers);
+  }else{
+    fromDatabase.unfollowUser(req.session.username, req.query.user, allUsers);
+  }
+  res.send();
+});
+
+//listen at the appropriate port
 app.listen(port, ()=>{
   console.log("Currently Listening at http:/localHost: " + port)
 });

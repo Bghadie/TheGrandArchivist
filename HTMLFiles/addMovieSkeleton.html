@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lan = "en">
+  <head>
+    <meta charset = "UTF-8">
+    <link rel = "stylesheet" href = "../layouts/AddMovieStyle.css">
+    <title>Add Movie</Title>
+  </head>
+  <body>
+    <script id="script"src="../content/addMovieFunctionality.js" onload="init()" defer></script>
+    <h1>Enter Movie Information</h1>
+    Separate multiple entries with a comma (i.e., Jack Black, Terry Crews)
+    <br></br>
+    Minimally, you must enter a movie Title, Director, Writer, and Actor
+    <br></br>
+    If you just want to automatically add some random movie, enter an into the "Auto Generate" field
+    <br></br>
+    <div id ="bigContainer">
+      <div id ="container1">
+          <left> </left>
+          <p>Title:</p>
+          <input type = "text" id = "Title" class="searchBar">
+          <p>Actor:</p>
+          <input type = "text" id = "Actor" class="searchBar">
+          <p>Writer:</p>
+          <input type = "text" id = "Writer" class="searchBar">
+          <right> </right>
+      </div>
+      <div id ="container2">
+          <left> </left>
+          <p>Director:</p>
+          <input type = "text" id = "Director" class="searchBar">
+          <p>Year:</p>
+          <input type = "text" id = "Year" class="searchBar">
+          <p>Summary:</p>
+          <input type = "text" id = "Summary" class="searchBar">
+          <right> </right>
+      </div>
+      <div id ="container3">
+          <left> </left>
+          <p>Runtime:</p>
+          <input type = "text" id = "Runtime" class="searchBar">
+          <p>Auto Generate:</p>
+          <input type = "text" id = "autoGenerate" class="searchBar">
+          <right> </right>
+      </div>
+    </div>
+    <br></br>
+    <button type = "button" id="addMovie">Add Movie</button>
+  </body>
+</html>

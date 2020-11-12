@@ -4,9 +4,13 @@ body{
   margin: 10px auto;
 
 }
-#row1, #row2, #row3, #row4{
+#row1, #row2, #row3{
   display:flex;
   flex-direction: row;
+}
+.eachItem{
+  flex-direction: row;
+  width: 20%;
 }
 #someHeader{
   margin-bottom: 0px;
@@ -35,13 +39,18 @@ img{
   display: block;
   float: left;
 }
-#logIn:hover, #addReview:hover{
+#logIn:hover, #addReview:hover, #addPerson:hover{
   background-color: RGB(237,134,150);
 }
-#logIn:active, #addReview:active{
+#logIn:active, #addReview:active, #addPerson:active{
   background-color: RGB(237,134,150);
   box-shadow: 0 2px #666;
   transform: translateY(3px);
+}
+#addReview:disabled, #addPerson:disabled{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
 }
 movieTitle{
   position: flex;
@@ -130,15 +139,28 @@ actors{
   overflow-y:scroll;
 
 }
-reviews{
-  position: flex;
-  margin-left: 10px;
+.reviews{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-height: 200px;
   margin-top: 10px;
-  height: 200px;
-  width: 880px;
+  overflow: auto;
   border: solid;
-  overflow-y: scroll;
+  background: white;
 
+}
+.secondList{
+  margin-left: -40px;
+}
+.firstList{
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding: 5px;
+  min-width: 200px;
+  max-width: 200px;
+  border-right:solid;
 }
 #addReview{
   position: flex;
@@ -150,7 +172,17 @@ reviews{
   max-width: 150px;
   height: 25px;
   border-radius:  5px;
-
+}
+#addPerson{
+  position: flex;
+  float: left;
+  flex-wrap: wrap;
+  flex: 0 1 100%;
+  margin-left: 10px;
+  margin-top: 10px;
+  max-width: 150px;
+  max-height: 25px;
+  border-radius:  5px;
 }
 #logIn{
   position: flex;

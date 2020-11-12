@@ -2,7 +2,7 @@ html(lang = 'en')
   head
     meta(charset = "UTF-8")
     style(type = "text/css"): include ../layouts/ViewingMoviesStyle.css
-    Title !{someMovie.Title}
+    Title#title !{someMovie.Title}
   body
     html(lang = 'en')
     script(src = "../content/ViewMovieFunctionality.js", id="script",onload="init()",defer)
@@ -11,9 +11,11 @@ html(lang = 'en')
         poster
           img(src= someMovie.Poster alt ="well the image isn't loading")
         rating
-          for ratings of someMovie.Ratings
-            | !{ratings.Source}: !{ratings.Value}
+          if(someMovie.Ratings)
+            for ratings of someMovie.Ratings
+              li !{ratings.Source}: !{ratings.Value}
             br
+        input(type="submit",id="addPerson", value="Add Person")
       #container2
         movieTitle
           | !{someMovie.Title}
@@ -24,8 +26,9 @@ html(lang = 'en')
           | !{someMovie.Runtime}
         genre
           |<strong>Genre:</strong>
-          for genres of someMovie.Genre.split(",")
-            li: a(href="#", onclick ='javascript:findGenre(this)' name = genres) !{genres}
+          if(someMovie.Genre)
+            for genres of someMovie.Genre.split(",")
+              li: a(href="#", onclick ='javascript:findGenre(this)' name = genres) !{genres}
         director
           |<strong>Director:</strong>
           for directors of someMovie.Director.split(",")
@@ -51,6 +54,13 @@ html(lang = 'en')
     #row2
       input(type="submit",id="addReview", value="Add Review Button")
     #row3
-      reviews Best movie I've ever seen 4/10
+    .reviews
+      for key of Object.keys(someMovie.review)
+        ul.firstList
+          li: a(href="#", onclick ='findUser(this)' name = key) !{key}
+          ul.secondList
+            li <u><b>Score</b></u>: !{someMovie.review[key].score}
+            li <u><b>Summary</b></u>: !{someMovie.review[key].summary}
+            li <u><b>Review</b></u>: !{someMovie.review[key].review}
     #row4
       p <a id="backToSearch" href="http://localhost:3000/">Back to Search</a>

@@ -22,7 +22,7 @@ script#script(src='../content/userFunctionality.js' onload='init()' defer='')
   ul
   if(someUser.followingUsers.length > 0)
     for users of someUser.followingUsers
-      li#link !{users}
+      li: a(href="#", onclick ='javascript:findUsers(this)' name = users)#link !{users}
 #resentreviews
   h2 Recent Reviews
   ul
@@ -31,12 +31,13 @@ script#script(src='../content/userFunctionality.js' onload='init()' defer='')
     ul
       li Score: !{someUser.reviews[names].score}
       li Review: !{someUser.reviews[names].review}
+      li Summary: !{someUser.reviews[names].summary}
 #peoplefollowing
   h2 People Followed
   ul
   if(someUser.followingPeople.length > 0)
     for people of someUser.followingPeople
-      a(href="#", onclick ='javascript:findPerson(this)', name = people)#link !{people}
+      li: a(href="#", onclick ='javascript:findPerson(this)', name = people)#link !{people}
 button#stopfollowing(type='button') Stop Following
 div1#buttonBreakLine
 p

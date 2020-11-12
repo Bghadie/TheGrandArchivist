@@ -1,10 +1,12 @@
 const fs = require('fs');
 
 const allInformation = require("./movie-data.json");
+const fromDatabase = require("./buisnessLogic")
 database = {};
 
 // creates movie database:
 index = 0;
+
 for(films of allInformation){
   let data = films
   database[index] = {data}

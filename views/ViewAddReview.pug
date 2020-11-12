@@ -1,0 +1,34 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  link(rel='stylesheet' href='../layouts/AddStyle.css')
+  title Add Review
+script#script(src='../content/addReviewFunctionality.js' onload='init()' defer='')
+h1(title = movieTitle )#title Enter Movie Review for: !{movieTitle}
+|     There are two methods to add a review to a movie.
+br
+br
+|     1) simply give the movie a score out of 10
+br
+br
+|     2) give the movie a score out of 10, write a brief summary of the movie, then writer your full review
+br
+#bigContainer
+  #container1
+    left
+    p Score:
+    input#Score.searchBar(type='text')
+    p Summary:
+    textarea#Summary1.searchBar(rows = "10" cols = "50" type='text')
+    p Review:
+    textarea#Review.searchBar(type='text')
+
+br
+br
+button#addReview(type='button') Add Review
+br
+br
+br
+p#errorMsg Test
+br
+a#backToSearch(href='http://localhost:3000/') Back to Search

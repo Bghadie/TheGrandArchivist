@@ -15,18 +15,24 @@ body{
   width: 95%
   margin: 10px auto;
 }
-#logIn:hover, #search:hover, #searchCriteria:hover{
+#logIn:hover, #search:hover, #searchCriteria:hover, #addMovie:hover, #addPerson:hover{
   background-color: RGB(237,134,150);
 }
-#logIn:active, #search:active{
+#logIn:active, #search:active,#addMovie:active, #addPerson:active{
   background-color: RGB(237,134,150);
   box-shadow: 0 2px #666;
   transform: translateY(4px);
+}
+#addMovie:disabled, #addPerson:disabled{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
 }
 #container1{
   display:flex;
   flex-direction: row;
 }
+
 #container2{
   display:flex;
   flex-direction: row;
@@ -58,6 +64,15 @@ img{
   padding-bottom: 10px;
   border-radius:  5px;
 
+}
+#addMovie, #addPerson{
+  float:left;
+  width: 75%;
+  padding-top: 10px;
+  margin-left: 80px;
+  margin-top: 20px;
+  padding-bottom: 10px;
+  border-radius: 5px;
 }
 #searchCriteria{
   margin-top: 10px;
@@ -97,5 +112,4 @@ img{
   margin-top: 10px;
   height: 29px;
   margin-bottom: 10px;
-
 }

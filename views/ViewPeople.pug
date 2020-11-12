@@ -1,0 +1,15 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  link(rel='stylesheet' href='../layouts/similarMovies.css')
+  title Search
+script#script(src='../content/matchedSearchCriteria.js' onload='init()' defer='')
+h1 Because You Searched: "!{searchCriteria}"
+for key of somePeople
+    #container4
+      #container5
+        a(href="#", onclick ='javascript:findPerson(this)' name = key.name)#name !{key.name}
+#PrevNext
+  a(href="#", onclick ='javascript:prevPagePerson(this)' name = previous)#previous Previous
+  a(href="#", onclick ='javascript:nextPagePerson(this)' name = next)#next Next
+a#backToSearch(href='http://localhost:3000/') Back to Search
