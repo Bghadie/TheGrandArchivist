@@ -1,6 +1,9 @@
 function init(){
-  getMaxPage(); //checks to see if
   checkPrev(); //checks to see if the previous button should be activated
+  getMaxPage();
+  //this is a hidden element that contains the maximum page number when viewing
+  //a list of movies 
+  document.getElementById('maxPage').style.display = "none";
 }
 //this function checks whether or not to disable the previous page link
 function checkPrev(){
@@ -16,13 +19,29 @@ function checkPrev(){
   }
 }
 
+//this function checks whether or not to disable the next page link when
+//viewing a list of movies
+function checkNextMovie(){
+  let currentURL = window.location.search;
+  let urlParams = new URLSearchParams(currentURL)
+  let curPage = parseInt(urlParams.get("pageNum"));
+  //if the current page is the maximum page, disable the next page link
+  //note, I've hidden the maximum page number in the actual pug file (id = maxPage)
+  if((curPage) === parseInt(document.getElementById("maxPage").innerHTML)){
+    document.getElementById("next").classList.add("disableAnchor");
+  }else{
+    //otherwise enable the next page link
+    document.getElementById("next").classList.remove("disableAnchor");
+  }
+}
 //this function checks whether or not to disable the next page link
+//when viewing people or users
 function checkNext(maxPage){
   let currentURL = window.location.search;
   let urlParams = new URLSearchParams(currentURL)
   let curPage = parseInt(urlParams.get("pageNum"));
   //if the current page is the maximum page, disable the next page link
-  if((curPage) === (maxPage)){
+  if((curPage) === maxPage){
     document.getElementById("next").classList.add("disableAnchor");
   }else{
     //otherwise enable the next page link
@@ -37,29 +56,29 @@ function getMaxPage(){
   let urlParams = new URLSearchParams(currentURL)
   let queryString;
   urlParams.delete("pageNum");
-  //figure out what the user searched (i.e., movie, genre, etc) and set the
+  //figure out what the user searched (i.e., people or users) and set the
   //appropriate route
-  if(urlParams.get("title") || urlParams.get("title") === ""){
-    queryString = "/findMaxPageMovie?" + urlParams.toString();
-  }else if(urlParams.get("genre") || urlParams.get("genre") === ""){
-    queryString = "/findMaxPageGenre?" + urlParams.toString();
-  }else if(urlParams.get("year")|| urlParams.get("year") === "") {
-    queryString = "/findMaxPageYear?" + urlParams.toString();
-  }else if(urlParams.get("rating")|| urlParams.get("rating") === "") {
-    queryString = "/findMaxPageRating?" + urlParams.toString();
-  }else if(urlParams.get("name")|| urlParams.get("name") === ""){
+  if(urlParams.get("name")|| urlParams.get("name") === ""){
     queryString = "/findMaxPagePeople?" + urlParams.toString();
-  }else{
+  }else if(urlParams.get("user")|| urlParams.get("user") === ""){
     queryString = "/findMaxPageUser?" + urlParams.toString();
   }
+
   request.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
       checkNext(parseInt(this.response));//check to see if the next page link needs to be disabled
     }
   }
-  request.open("GET",queryString);
-  request.setRequestHeader('Content-Type',"text/html")
-  request.send();
+  //if the user was searching for a person or user, make the appropriate call
+  if(queryString){
+    request.open("GET",queryString);
+    request.setRequestHeader('Content-Type',"text/html")
+    request.send();
+  }else{
+    //otherwise they are searching for movies so check if
+    //if the next link needs to be disabled
+    checkNextMovie();
+  }
 }
 
 //this function is an attribute of all movies being listed on the page
@@ -154,6 +173,8 @@ function nextPageMovie(caller){
     queryString = "/movies?" + urlParams.toString()
   }else if(urlParams.get("rating") || urlParams.get("rating") === ""){
     queryString = "/movies?" + urlParams.toString()
+  }else if(urlParams.get("genre") || urlParams.get("genre") === ""){
+    queryString = "/movies?" + urlParams.toString()
   }
   request.onreadystatechange = function(){
     if(this.readyState == 4 && this.status == 200){
@@ -161,7 +182,6 @@ function nextPageMovie(caller){
       window.open(queryString, "_self");
     }
   }
-  console.log(queryString)
   request.open("GET",queryString);
   request.setRequestHeader('Content-Type',"text/html")
   request.send();

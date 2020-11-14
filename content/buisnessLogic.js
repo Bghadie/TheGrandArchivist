@@ -18,39 +18,142 @@ const randomMoiveTitles = ["Captain Of Death", "Defender On My Ship", "Guest Of 
 //array of random genres
 const randomGenres = ["Action", "Adventure", "Comedy","Crime","Drama","Fantasy","Horror","Thriller","Mystery","Satire", "Western"]
 
+//splice the list of movies that match the search criteria such that only 50 movies
+//display on screen at any given time
+function findMoviePerPage(objDisplaying, pageNum){
+  let someArray = [];
+  Object.keys(objDisplaying).forEach(function(id) {
+    someArray.push(objDisplaying[id]);
+  });
+  //the followig is a function that determines the range of indecies that should
+  //be displayed given a particular page number. For example
+    //page number 1 should show items from 0-49
+    //page number 2 should show items frm 50 - 100
+  let numberOfItemsPerPage = 50;
+  let start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+  return someArray.splice(start,50);
+}
 
-/*
-Assumption: the function takes a minimum rating threshold
-Purpose: get all the movies who's average rating is at or above the given threshold
-Returns: returns an array of movie titles that meet the given threshold
-*/
-function getListOfReviews(threshold){
-  let matchedMovies = []; //placeholder array
+
+//This function narrows down the database to only movies that match the searched
+//title
+function findSimilarMovies(partialTitle){
+  let similarMovies = [];
+  //if the search criteria is empty, all movies should be considered a match
+  if(partialTitle === ""){
+    Object.keys(movieDatabase).forEach(function(id) {
+      similarMovies[id] = movieDatabase[id];
+    });
+  }else{
+    //get every movie that matches the serach criteria
+    Object.keys(movieDatabase).forEach(function(id) {
+      if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
+        similarMovies[id] = movieDatabase[id];
+      }
+    });
+  }
+
+  return similarMovies;
+}
+
+//This function narrows down the database to only movies that match the searched
+//genre
+function findGenres(genre, someDatabase){
+  let similarGenres = {};//placeholder array
+  //if the search was empty, all movies are considered matches
+  if(genre === ""){
+    Object.keys(someDatabase).forEach(function(id) {
+      similarGenres[id] = someDatabase[id];
+    });
+  }else{
+    //user can enter more than one genre, so split the search criteria by a comma or a space
+    if(genre.trim().includes(",")){
+      genre = genre.trim().split(",");
+    }else{
+      genre = genre.trim().split(" ");
+    }
+    //trim whitespace from the search criteria
+    for(index in genre){
+      genre[index] = genre[index].trim()
+    }
+    //for each movie in the database
+    Object.keys(someDatabase).forEach(function(id){
+      //get each genre in the movie database
+      let placeHolder = someDatabase[id].data.Genre.toUpperCase().split(",");
+      for(item in placeHolder){
+        placeHolder[item] = placeHolder[item].trim().toUpperCase();
+      }
+      //check if that genre matchs any of the search critera
+      let check = genre.every((value)=>
+        placeHolder.includes(value));
+      if(check){
+        //add the matched movie title to the array
+        similarGenres[id] = someDatabase[id];
+      }
+    });
+  }
+
+  return similarGenres;
+}
+
+//This function narrows down the database to only movies that match the searched
+//average minirating
+function getListOfReviews(threshold,someDatabase){
+  let matchedMovies = {}; //placeholder array
   let count; //placeholder count
   let average;//the average rating of a movie
   let sum; //the rating sum per movie
   //iterate over every movie in the database
-  Object.keys(movieDatabase).forEach(function(id){
+  Object.keys(someDatabase).forEach(function(id){
     sum = 0; //set the sum to 0
     //if tehre are no reviews in the movie, the average is 0
-    if(Object.keys(movieDatabase[id].data.review).length === 0){
+    if(Object.keys(someDatabase[id].data.review).length === 0){
       average = 0;
     }else{
       //calculate the average movie rating per film
-      count = Object.keys(movieDatabase[id].data.review).length;
-      for(users of Object.keys(movieDatabase[id].data.review)){
-        sum += movieDatabase[id].data.review[users].score;
+      count = Object.keys(someDatabase[id].data.review).length;
+      for(users of Object.keys(someDatabase[id].data.review)){
+        sum += someDatabase[id].data.review[users].score;
       }
       average = sum/count
     }
     //if the average meets the threhold, add it to the placeHolder array
     if(average >= threshold){
-      matchedMovies.push(movieDatabase[id]);
+      matchedMovies[id] = (someDatabase[id]);
     }
   });
   //return the placeholder array
   return matchedMovies;
 }
+
+//This function narrows down the database to only movies that match the searched
+//year of release
+function getMoviesByYear(criteria, someDatabase){
+  let matchedMovies = {}
+  let minimumYear = findMinYear(movieDatabase); //get the max year in the database
+  let maximumYear = findMaxYear(movieDatabase); //get the min year in the database
+  //if the search criteria is a valid year
+  if(criteria >= minimumYear && criteria <= maximumYear){
+    //find every movie that matches the search criteria
+    Object.keys(someDatabase).forEach(function(id){
+      let year = parseInt(someDatabase[id].data.Year.split("–"));
+      if(year === criteria){
+        matchedMovies[id] = someDatabase[id]; //get all movies released in the year of the search criteria
+      }
+    });
+  }else{
+    //all movies are considered a match, get them all and set the serach criteria appropriately
+    Object.keys(someDatabase).forEach(function(id){
+      matchedMovies[id] = someDatabase[id]; //get all movies released in the year of the search criteria
+    });
+    criteria = "Any Year";
+  }
+
+  return [matchedMovies, criteria];
+}
+
+
+
 
 /*
 this function is straight forward, it goes through the database and finds the newest movie's release year
@@ -81,34 +184,7 @@ function findMinYear(){
 }
 
 
-/*
-Assumption: takes a movie's title as a string (the search criteria) and a page number as an int
-Purpose:finds all movies in the database that matches the search criteria
-Returns: a list of all mathced movies
-*/
-function findSimilarMovies(partialTitle, pageNum){
-  let similarMovies = [];
-  //if the search criteria is empty, all movies should be considered a match
-  if(partialTitle === ""){
-    Object.keys(movieDatabase).forEach(function(id) {
-      similarMovies.push(movieDatabase[id]);
-    });
-  }else{
-    //get every movie that matches the serach criteria
-    Object.keys(movieDatabase).forEach(function(id) {
-      if((movieDatabase[id].data.Title.toUpperCase()).includes(partialTitle)){
-        similarMovies.push(movieDatabase[id]);
-      }
-    });
-  }
-  let numberOfItemsPerPage = 50;//the max number of people displayed on a page's search result
 
-  //this forumla is used to determine the subset/range of people from the matched list that will be
-  //displayed on screen
-  let start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-  //return a subset of matched movie titles
-  return similarMovies.splice(start,50);
-}
 /*
 This function is identitical to the find similar movies function except its used to find the total
 amount of pages needed to display all the movies that match the search criteria
@@ -167,8 +243,6 @@ function allPeople(pageNum){
   Object.keys(peopleDatabase).forEach(function(id) {
     similarPeople.push(peopleDatabase[id]);
   });
-  console.log(similarPeople.length)
-
   let numberOfItemsPerPage = 50;
   var start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
   return similarPeople.splice(start,50);
@@ -191,88 +265,6 @@ function findMaxPeople(partialName){
     return 0;
   }else{
     return Math.floor(similarPeople.length/50);
-  }
-}
-
-/*
-Assumption: takes the searched genre as a string and the current page number as an integer
-Purpose: creates a list of all movie's who's genre matches the genre searched by the user
-Returns: returns a list of all matched movies
-*/
-function findGenres(genre, pageNum){
-  let similarGenres = [];//placeholder array
-  //if the search was empty, all movies are considered matches
-  if(genre === ""){
-    Object.keys(movieDatabase).forEach(function(id) {
-      similarGenres.push(movieDatabase[id]);
-    });
-  }else{
-    //user can enter more than one genre, so split the search criteria by a comma or a space
-    if(genre.trim().includes(",")){
-      genre = genre.trim().split(",");
-    }else{
-      genre = genre.trim().split(" ");
-    }
-    //trim whitespace from the search criteria
-    for(index in genre){
-      genre[index] = genre[index].trim()
-    }
-    //for each movie in the database
-    Object.keys(movieDatabase).forEach(function(id){
-      //get each genre in the movie database
-      let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
-      for(item in placeHolder){
-        placeHolder[item] = placeHolder[item].trim().toUpperCase();
-      }
-      //check if that genre matchs any of the search critera
-      let check = genre.every((value)=>
-        placeHolder.includes(value));
-      if(check){
-        //add the matched movie title to the array
-        similarGenres.push(movieDatabase[id]);
-      }
-    });
-  }
-
-  let numberOfItemsPerPage = 50;//the max number of genres displayed on a page's search result
-
-  //this forumla is used to determine the subset/range of genres from the matched list that will be
-  //displayed on screen
-  let start = ((pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-  //return a subset of the array of matched genres
-  return similarGenres.splice(start, 50);
-}
-/*
-This function is identitical to the find genres function except its used to find the total
-amount of pages needed to display all the genres that match the search criteria
-*/
-function findMaxGenre(genre){
-  let similarGenres = [];
-  if(genre.trim().includes(",")){
-    genre = genre.trim().split(",");
-  }else{
-    genre = genre.trim().split(" ");
-  }
-  for(index in genre){
-    genre[index] = genre[index].trim()
-  }
-  Object.keys(movieDatabase).forEach(function(id){
-    let placeHolder = movieDatabase[id].data.Genre.toUpperCase().split(",");
-    for(item in placeHolder){
-      placeHolder[item] = placeHolder[item].trim();
-    }
-    let check = genre.every((value)=>
-      placeHolder.includes(value));
-    if(check){
-      similarGenres.push(movieDatabase[id]);
-    }
-  });
-  if(genre == ""){
-    return Math.floor(Object.keys(movieDatabase).length/50)
-  }else if(similarGenres.length <= 50){
-    return 0;
-  }else{
-    return Math.floor(similarGenres.length/50);
   }
 }
 
@@ -796,32 +788,6 @@ function handleAlerts(user){
   return alerts;
 }
 
-//this function gets a list of all movies that match a search criter (year)
-function getMoviesByYear(criteria, pageNum){
-  let matchedMovies = []
-  let minimumYear = findMinYear(movieDatabase); //get the max year in the database
-  let maximumYear = findMaxYear(movieDatabase); //get the min year in the database
-  //if the search criteria is a valid year
-  if(criteria >= minimumYear && criteria <= maximumYear){
-    //find every movie that matches the search criteria
-    Object.keys(movieDatabase).forEach(function(id){
-      let year = parseInt(movieDatabase[id].data.Year.split("–"));
-      if(year === criteria){
-        matchedMovies.push(movieDatabase[id]); //get all movies released in the year of the search criteria
-      }
-    });
-  }else{
-    //all movies are considered a match, get them all and set the serach criteria appropriately
-    Object.keys(movieDatabase).forEach(function(id){
-      matchedMovies.push(movieDatabase[id]);
-    });
-    criteria = "Any Year";
-  }
-  let numberOfItemsPerPage = 50;
-  let start = ((parseInt(pageNum+1) * numberOfItemsPerPage) - (numberOfItemsPerPage));
-  //return an array that contains the search criteria and a subset of all matched films
-  return [matchedMovies.splice(start,50), criteria];
-}
 /*
 Export all the functionality needed by the server
 */
@@ -844,11 +810,8 @@ module.exports = {
   createPerson:createPerson,
   addPersonToMovie:addPersonToMovie,
   findGenres:findGenres,
-  findMaxGenre:findMaxGenre,
-  findMaxPage:findMaxPage,
   findSimilarMovies:findSimilarMovies,
   findMinYear:findMinYear,
-  findMaxYear:findMaxYear,
   getListOfReviews:getListOfReviews,
   isValidPass:isValidPass,
   randomMoiveTitles:randomMoiveTitles,
@@ -864,5 +827,6 @@ module.exports = {
   addAlertConcerningUser:addAlertConcerningUser,
   handleAlerts:handleAlerts,
   sortRecentWork:sortRecentWork,
-  getMoviesByYear:getMoviesByYear
+  getMoviesByYear:getMoviesByYear,
+  findMoviePerPage:findMoviePerPage
 };

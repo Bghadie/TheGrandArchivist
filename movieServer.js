@@ -65,70 +65,101 @@ app.get("/", (req, res) => {
   res.render("HomePage",{});
 });
 
-//this is my movie route. It does a check and, depending on the result
-//will send a specific response
+
+/*
+This is my /movies path that allows users to search the database for a movie based
+on the particulat query parameters (title, genre, year, average rating). The logic is as
+follows:
+1) if a partial title was entered, find all movies that match the partial title
+2) if a genre was entered, filter the matched search criteria further by matched genres
+3) if a year was entered, filter the matched search criteria FURTHER by year
+4) finally, do the above for average minirating
+Then it renders an array that contains all the movies that meet the search parameters
+*/
 app.get("/movies", (req, res, next) =>{
-  //if the client is looking for a movie title do the following
+  //the initial search result includes all movies
+  let moviesByTitle = movieDatabase;
+  res.locals.searchCriteria = "" //initial search criteria
+  //if the user is seraching by movie title
   if(req.query.title || req.query.title ===""){
     let movie = fromDatabase.getIDByTitle(req.query.title); //basically a flag variable
     //if the movie is in the database, render it
     if(movie){
       res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
     }else{
-      //get all movies that match the search criteria and render the movie
-      let moviesByTitle = fromDatabase.findSimilarMovies(req.query.title.toUpperCase(), parseInt(req.query.pageNum),movieDatabase);
       if(req.query.title === ""){
         //set the search criteria to all movies
-        res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": "All Movies"});
+        moviesByTitle = movieDatabase;
+        res.locals.searchCriteria += "Any movie " //set the appropriate search criteria
       }else{
+        //get all movies that match the search criteria
+        moviesByTitle = fromDatabase.findSimilarMovies(req.query.title.toUpperCase());
         //set the search criteria to the search criteria
-        res.render("ViewMovieList",{"someMovies":moviesByTitle, "searchCriteria": req.query.title});
+        res.locals.searchCriteria +=  " '" + req.query.title + "' "
       }
+      //the response.locals is how I intend to pass the matched search criteria across
+      //retquests
+      res.locals.allMatches = moviesByTitle;
+      res.locals.pageNum = parseInt(req.query.pageNum);
+      next();//call next
     }
   }else{
-    next();//they aren't looking for a movie title, call next
+    //the user didn't search for a title
+    //the response.locals is how I intend to pass the matched search criteria across
+    //retquests
+    res.locals.allMatches = moviesByTitle;
+    res.locals.pageNum = parseInt(req.query.pageNum);
+    next(); //call next
   }
 }, (req,res,next) =>{
+  let listOfMovies;
   //if the client is looking for a genre
-  if(req.query.genre || req.query.genre ===""){
-    //get all genres that match the search criteria
-    let listOfMovies = fromDatabase.findGenres(req.query.genre.toUpperCase(), parseInt(req.query.pageNum),movieDatabase);
+  if(req.query.genre || req.query.genre === ""){
     //if the user entered nothing, all movies match
     if(req.query.genre === ""){
-      //render the list of movies
-      res.render("ViewGenre",{"someMovies":listOfMovies, "searchCriteria": "All Genres"});
+      listOfMovies = res.locals.allMatches;
+      res.locals.searchCriteria += " Any genre "
     }else{
-      //render the list of movies that match the search criteria
-      res.render("ViewGenre",{"someMovies":listOfMovies, "searchCriteria": req.query.genre});
+      //get all genres that match the search criteria
+      listOfMovies = fromDatabase.findGenres(req.query.genre.toUpperCase(), res.locals.allMatches);
+      res.locals.allMatches = listOfMovies;
+      res.locals.searchCriteria += " '" + req.query.genre + "' "
     }
-  }else{
-    next(); //they aren't looking for a genre either, call next
   }
+  next(); //check the next search criteria
 }, (req,res,next) =>{
+  let matchedMovies;
   //if the client is looking for a year
   if(req.query.year || req.query.year === ""){
     let criteria = parseInt(req.query.year);//store the minimum year they want
-    //get all movies that match the search criteria and render it
-    let matchedMovies = fromDatabase.getMoviesByYear(criteria, req.query.pageNum);
-    res.render("ViewMovieList",{"someMovies":matchedMovies[0], "searchCriteria": matchedMovies[1]});
-  }else{
-    next(); //they aren't looking for a year either, call next
+    //get all movies that match the search criteria
+    matchedMovies = fromDatabase.getMoviesByYear(criteria, res.locals.allMatches);
+    res.locals.allMatches = matchedMovies[0];
+    res.locals.searchCriteria += matchedMovies[1]
   }
+  next(); //check the final search criteria
 },(req,res) =>{
   let threshold = parseFloat(req.query.rating); //get the threshold
   //if the threshold is valid
   if(threshold >=0){
-    //get all movies who's average rating are at or above the threshold and render it
-    let matchedMovies = fromDatabase.getListOfReviews(threshold, movieDatabase);
-    let criteria = "Movies with Rating of at least " + threshold
-    let numberOfItemsPerPage = 50;
-    let start = ((parseInt(req.query.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
-    res.render("ViewMovieList",{"someMovies":matchedMovies.splice(start,50), "searchCriteria": criteria});
+    //get all movies who's average rating are at or above the threshold
+    let matchedMovies = fromDatabase.getListOfReviews(threshold, res.locals.allMatches);
+    res.locals.allMatches = matchedMovies;
+    res.locals.searchCriteria += " rating of " + threshold;
   }else{
-    //its not a valid threshold, send an error
-    res.status(404).send();
+    res.locals.searchCriteria += " Any rating";
   }
+  //get an array of movies to render
+  //Because only a certain amount of movies (max 50) will be listed on the page, this fucntion
+  //will get the "next 50" movies to be rendered. "Next" is a reference to the fact that the
+  //displayed movied will vary based on the page number being shown 
+  let finalMatches = fromDatabase.findMoviePerPage(res.locals.allMatches, res.locals.pageNum)
+  //render the list of movies
+  res.render("ViewMovieList",{"someMovies":finalMatches,
+              "searchCriteria": res.locals.searchCriteria,
+              maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
 });
+
 
 //this function searchs for a movie by a given ID
 app.get("/movies:id", (req, res) =>{
@@ -175,57 +206,6 @@ app.get("/people:id", (req,res)=>{
     let sortAllCollabs = fromDatabase.sortArray(fromDatabase.findCoworker(allWork, peopleDatabase[id].name,movieDatabase)); //sort their collaboration by most frequent
     //render the page
     res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
-  }
-});
-
-//this function finds the maximum pages need to display all movies that meet the serached criteria
-app.get("/findMaxPageMovie", (req,res) =>{
-  let maxPageNum = fromDatabase.findMaxPage(req.query.title.toUpperCase(),movieDatabase);
-  res.send(maxPageNum.toString());
-});
-
-//this function finds the maximum pages need to display all genres that meet the serached criteria
-app.get("/findMaxPageGenre", (req,res) =>{
-  let maxPageNum = fromDatabase.findMaxGenre(req.query.genre.toUpperCase(),movieDatabase);
-  res.send(maxPageNum.toString());
-});
-
-//this function finds the maximum pages need to display all years that meet the serached criteria
-app.get("/findMaxPageYear", (req,res) =>{
-  let threshold = parseInt(req.query.year);
-  let minimumYear = fromDatabase.findMinYear(movieDatabase);
-  let maximumYear = fromDatabase.findMaxYear(movieDatabase);
-  let matchedMovies = [];
-  let criteria;
-  if(threshold >= minimumYear && threshold <= maximumYear){
-    Object.keys(movieDatabase).forEach(function(id){
-      let year = parseInt(movieDatabase[id].data.Year.split("–"));
-      if(year === threshold){
-        matchedMovies.push(movieDatabase[id]);
-      }
-    });
-  }else{
-    Object.keys(movieDatabase).forEach(function(id){
-      matchedMovies.push(movieDatabase[id]);
-    });
-  }
-  if(matchedMovies.length <=50){
-    res.send("0");
-  }else{
-    let maxPage = Math.floor((matchedMovies.length)/50);
-    res.send(maxPage.toString());
-  }
-});
-
-//this function finds the maximum pages need to display all movies that meet the minimum average rating
-app.get("/findMaxPageRating", (req,res) =>{
-  let threshold = parseFloat(req.query.rating);
-  let matchedMovies = fromDatabase.getListOfReviews(threshold,movieDatabase);
-  if(matchedMovies.length <=50){
-    res.send("0");
-  }else{
-    let maxPage = Math.floor((matchedMovies.length)/50);
-    res.send(maxPage.toString());
   }
 });
 
@@ -494,7 +474,6 @@ app.post("/addMovie:auto",auth,(req, res)=>{
     let addedMovieId = fromDatabase.getIDByTitle(fromDatabase.randomMoiveTitles[randomTitleIndex]);
     movieDatabase[addedMovieId].data.Genre = fromDatabase.randomGenres[randomGenreIndex];
     movieDatabase[addedMovieId].data.Runtime = Math.floor(Math.random()*360 + 120) + " min"
-    console.log(movieDatabase[addedMovieId].data.Title)
   }
   res.send();
 });

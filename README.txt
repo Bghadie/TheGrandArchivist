@@ -5,18 +5,20 @@ Partner: None
 
 Installations:  
 
-	•	Frankly I'm not to sure how this will work on open 
-		stack. Everything should be installed and ready to 
-		go right out of the gate, but just incase I've included 
-		instructions for installation and running the server.
+	•	Everything should be downloaded and installed.
+		All you need to do is go into the "The Grand
+		Cinema" directory through terminal and type:
+			"npm start"
 
-	•	Download the file I submitted, and in the same 
-		directory, copy and paste the following into your 
-		terminal:
-			"npm install"
+	•	If there is some error, enter "npm install" then
+		try npm start again.
 
-	•	Now that all the requisite node files have been 
-		downloaded, you can test and run the server. 
+Open Stack Information:
+
+	•	Instance ID: BillalGhadie 
+	•	Public IP: 134.117.128.84
+	•	Username: Student 
+	•	Password: GrandCinema 
 
 
 Running & Testing:
@@ -25,7 +27,28 @@ Running & Testing:
 		call “node movieServer.js” or “npm start” in your 
 		command line and open up http://localhost:3000/ in 
 		google chrome. 
- 
+
+ 	•	NOTE: I found out the evening before the submission 
+		was due that I misunderstood a functionality. That is, 
+		my server was set up to search for movie based on 
+		EITHER a title OR a genre OR a year OR a mini rating 
+		(read or as xor). This has been fixed on the server 
+		side. However, I am still working on an 
+		implementation that would allow clients to search by 
+		multiple criteria. For now, to test this functionality just 
+		cut and paste the following into the search bar:
+
+		http://localhost:3000/movies?title=the&genre=action&year=2000&pageNum=0
+
+		This will search for a movie the "the" in the title, is an 
+		action movie, and came out in 2000. You can modify 
+		the following to do an every more specific search:
+
+		http://localhost:3000/movies?title=the&genre=action&year=2000&rating=&pageNum=0
+
+		Just fill in any combination of search parameters and 
+		see if there are any matches.
+	
 	•	With the server running, you can basically test any 
 		and all functionality. That is, I've completed 99% of 
 		the project with the only things left to do are to 
