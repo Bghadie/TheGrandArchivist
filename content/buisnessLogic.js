@@ -658,13 +658,19 @@ function findCoworker(peopleDatabase, name){
     for(works of peopleDatabase){
         if(movieDatabase[key].data.Title === works){
           for(actors of movieDatabase[key].data.Actors.split(",")){
-            array[actors] = array[actors] ? array[actors]+1 : 1;
+            if(!actors.trim().includes(name)){
+              array[actors.trim()] = array[actors.trim()] ? array[actors.trim()]+1 : 1;
+            }
           }
           for(directors of movieDatabase[key].data.Director.split(",")){
-            array[directors] = array[directors]?array[directors]+1:1;
+            if(!directors.trim().includes(name)){
+              array[directors.trim()] = array[directors.trim()]?array[directors.trim()]+1:1;
+            }
           }
           for(writers of movieDatabase[key].data.Writer.split(",")){
-            array[writers] = array[writers]?array[writers]+1:1;
+            if(!writers.trim().includes(name)){
+              array[writers.trim()] = array[writers.trim()]?array[writers.trim()]+1:1;
+            }
           }
         }
     }
@@ -787,6 +793,8 @@ function handleAlerts(user){
   //return that araray of alters
   return alerts;
 }
+
+
 
 /*
 Export all the functionality needed by the server

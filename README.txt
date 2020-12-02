@@ -28,37 +28,6 @@ Running & Testing:
 		command line and open up http://localhost:3000/ in 
 		google chrome. 
 
- 	•	NOTE: I found out the evening before the submission 
-		was due that I misunderstood a functionality. That is, 
-		my server was set up to search for movie based on 
-		EITHER a title OR a genre OR a year OR a mini rating 
-		(read or as xor). This has been fixed on the server 
-		side. However, I am still working on an 
-		implementation that would allow clients to search by 
-		multiple criteria. For now, to test this functionality just 
-		cut and paste the following into the search bar:
-
-		http://localhost:3000/movies?title=the&genre=action&year=2000&pageNum=0
-
-		This will search for a movie the "the" in the title, is an 
-		action movie, and came out in 2000. You can modify 
-		the following to do an every more specific search:
-
-		http://localhost:3000/movies?title=the&genre=action&year=2000&rating=&pageNum=0
-
-		Just fill in any combination of search parameters and 
-		see if there are any matches.
-	
-	•	With the server running, you can basically test any 
-		and all functionality. That is, I've completed 99% of 
-		the project with the only things left to do are to 
-		create the recommend movies for each user and 
-		translating everything into MongoDB. I've left these 
-		till the end because my recommendation 
-		"algorithm" is slow (and done dynamically). I have 
-		an idea on how to fix this issue but it will require 
-		using an actual database (Mongo) so I'll add that 
-		final functionality in the next (last?) check in.
 
 	•	To help streamline testing I've set up to users in the 
 		database:
@@ -72,7 +41,7 @@ Running & Testing:
 	•	I suggest logging in under Jegan to test a majority of 
 		the functionality (you are not a contributing user). Of 
 		key importance, leave a couple of reviews on some 
-		movies. Because I'm a suck up, Billal is actually 
+		movies. Billal is actually 
 		following Jegan. So after you are done a majority of 
 		your testing, log into Billal's account to test the 
 		notification system (i.e., an alert should be sent 
@@ -88,36 +57,16 @@ Running & Testing:
 			this way so you can search the title. Also, if you 
 			want to test the "add a new person to the 
 			database", add yourself to "Toy Story".
-
-		•	When viewing movies, the similar movies 
-			portion of the screen is SLOW, I'm sorry. So 
-			when viewing movies wait like 15 seconds MAX 
-			for it to load. If nothing ends up loading please 
-			make a note of it and let me know (I can 
-			probably guess why its happening, so it's a 
-			fixable problem)		
-
-		•	On that note, my "algorithm" that generates 
-			similar movies was implemented using a few 
-			resources from the web (I commented the links at the 
-			top of the relevant source code). If you are 
-			unfamiliar with the sklearn python 
-			library, I tried my best to briefly explain what 
-			each function does (I got to play around a lot 
-			with sklearn when I completed my masters). 
-
-		•	Otherwise, like I said I'm basically done the 
-			project. So if you catch any bugs please let me 
-			know so I can fix them. Also, I would like to get 
-			as close to 100% as possible on the project 
-			(unsurprisingly), so if you have any tips that I 
-			can use to improve my program and thus my 
-			mark, I would greatly appreciate it.   
-
+	
+		•	To test a multi parametric search, go to the home page, select the search criteria you 
+			would like (i.e., Title, Genre, Mini-rating, Year) then enter something into the search 
+			bar. Do not press "search", instead, press "Add Search Criteria". You have now filtered 
+			you search. You can do this for any combination of the remaining search criteria. Once 
+			you have build your search, press the search button. 
 
 List of HTML/CSS/Pug/JS Files:
 
-1) HTML - No real changes since the last checkin 
+1) HTML - Unimportant, there only as backups  
 
 2) CSS - All my CSS files, used to make my website “pretty”. 
 		The names of each CSS file should be nearly 
@@ -276,10 +225,6 @@ List of HTML/CSS/Pug/JS Files:
 			feature). The findMovie function, and all similar 	
 			functions, are handled by this JS file. 
 
-	•	createDatabases.js
-		⁃	Code that creates my janky databases, I didn't add 
-			many comments here and frankly, I wouldn't bother 
-			looking through this unless you're curious. 
 	
 
 5) API - so far I've only included the following functionality:
@@ -291,19 +236,11 @@ List of HTML/CSS/Pug/JS Files:
 
 6) Miscellaneous files:
 
-	•	movieRecommendertest.py
-		⁃	Ignore this, its basically a "backup" movie 
-			recommender file
-
 	•	movieRecommender.py
 		⁃	Uses a movie's genres, actors, and directors (and 
 			a nifty little algorithm) to generate similar movies/
 			movies I could recommend to the user. 
 
-	•	updateDataFrame.py
-		⁃	Ignore this, it does nothing now but will come in 
-			handy for the final project submission. I'll explain it 
-			then.
 
 	•	DataFrame.csv
 		⁃	A database of "valid movies" which I use to 

@@ -3,7 +3,6 @@
 const express = require("express");
 const app = express();
 const pug = require("pug");
-const {PythonShell} = require('python-shell');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const fromDatabase = require("./content/buisnessLogic");
@@ -17,16 +16,15 @@ const peopleDatabase = require("./content/peopleDatabase");
 const movieDatabase = require("./content/movieDatabase");
 const allUsers = require("./content/userDatabase");
 
-fromDatabase.addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"}, movieDatabase, allUsers);
-fromDatabase.addReview("IlluaDaddy", "Toy Story", {score:10, review:"YAY"}, movieDatabase, allUsers);
-fromDatabase.addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"}, movieDatabase, allUsers);
-fromDatabase.addReview("JoestInTime", "Toy Story", {score:7, review:"I have watched this movie A LOT. Tom Hanks was great in it but I stil can't freaking stand Tim Allen, the god damn snitch"}, movieDatabase, allUsers);
-
+fromDatabase.addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"});
+fromDatabase.addReview("IlluaDaddy", "Toy Story", {score:10, review:"YAY"});
+fromDatabase.addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"});
+fromDatabase.addReview("JoestInTime", "Toy Story", {score:7, review:"I have watched this movie A LOT. Tom Hanks was great in it but I stil can't freaking stand Tim Allen, the god damn snitch"});
 
 function auth(req,res,next){
   if(!req.session.loggedIn){
     res.status(401).send("Unauthorized Access");
-    return;
+    return false;
   }else{
     next();
   }
@@ -47,7 +45,6 @@ app.use(session({
 }));
 
 
-
 app.use(function(req, res, next){
   console.log("----------------------------");
   console.log("Request Method: " + req.method)
@@ -65,6 +62,13 @@ app.get("/", (req, res) => {
   res.render("HomePage",{});
 });
 
+//this function searchs for a movie by a given ID
+app.get("/movies:id", (req, res) =>{
+  let id = parseInt(req.params.id.substring(1)); //get the ID the user searched for
+  if(fromDatabase.isValidId(id, 1,movieDatabase)){ //check if its a valid ID
+    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+  }
+});
 
 /*
 This is my /movies path that allows users to search the database for a movie based
@@ -152,7 +156,7 @@ app.get("/movies", (req, res, next) =>{
   //get an array of movies to render
   //Because only a certain amount of movies (max 50) will be listed on the page, this fucntion
   //will get the "next 50" movies to be rendered. "Next" is a reference to the fact that the
-  //displayed movied will vary based on the page number being shown 
+  //displayed movied will vary based on the page number being shown
   let finalMatches = fromDatabase.findMoviePerPage(res.locals.allMatches, res.locals.pageNum)
   //render the list of movies
   res.render("ViewMovieList",{"someMovies":finalMatches,
@@ -161,13 +165,6 @@ app.get("/movies", (req, res, next) =>{
 });
 
 
-//this function searchs for a movie by a given ID
-app.get("/movies:id", (req, res) =>{
-  let id = parseInt(req.query.id); //get the ID the user searched for
-  if(fromDatabase.isValidId(id, 1,movieDatabase)){ //check if its a valid ID
-    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
-  }
-});
 
 //this is my person route. It does a check and, depending on the result
 //will send a specific response
@@ -199,7 +196,7 @@ app.get("/people", (req,res)=>{
 });
 //this function searchs for a person by a given ID
 app.get("/people:id", (req,res)=>{
-  let id = parseInt(req.query.id); //convert the ID into an int
+  let id = parseInt(req.params.id.substring(1)); //convert the ID into an int
   if(fromDatabase.isValidId(id,2,peopleDatabase)){ //check that its valid
     let profession = peopleDatabase[id].profession; //get their profession
     let allWork = fromDatabase.findWork(peopleDatabase[id].name.trim(),peopleDatabase) //get all their work and sort it by most recent
@@ -223,33 +220,19 @@ Assumption: takes a string consisting of MovieTitle,MovieYear as an argument
 It gets a list of all similar movies based off my algorithm (see movieRecommender.py)
 */
 app.get("/recommendMovieGeneral",(req, res) =>{
-  let someString = req.query.info;//get the serch criteria
-  let movieExists = fromDatabase.getIDByTitle(someString.split(",")[0]); //make sure the movie exists
-  if(movieExists){//if the movie exists
-    //start a python shell to run the movieRecommender script
-    let pyshell = new PythonShell("movieRecommender.py");
-    pyshell.send(someString)//send the search criteria to the script as an argv
-    pyshell.on('message', function(message){
-      //this takes the response and parses it into something readable
-      //note, the response is taken from what ever the python script prints
-      let arr = message.split("|").filter(function(e){//split the response from the script by | character
-        return e !== "";//get each individual movie title
-      });
-      let movieObjs = []
-      for(titles of arr){
-        movieObjs.push(movieDatabase[fromDatabase.getIDByTitle(titles)].data);//push each movie object into the placeholder array
-      }
-      //render the recomended movies
-      res.render("ReccMovieGen", {"someMovies":movieObjs});
-    });
-    //end the python shell
-    pyshell.end(function(err,code,signal){
-      //these exist for testing purposes
-
-    /*  console.log('The exit code was: ' + code);
-      console.log('The exit signal was: ' + signal);
-      console.log('finished');*/
-    });
+  let id = fromDatabase.getIDByTitle(req.query.info);//get the serch criteria
+  let movieObjs = [];
+  let movieToRecommend;
+  try{
+    for(similarMovie of movieDatabase[id].data.recommended){
+      movieToRecommend = movieDatabase[fromDatabase.getIDByTitle(similarMovie)].data;
+      movieObjs.push(movieToRecommend);
+    }
+    //render the recomended movies
+    res.render("ReccMovieGen", {"someMovies":movieObjs});
+  }catch(err){
+    console.log("")
+    //do nothing
   }
 });
 
@@ -278,7 +261,40 @@ app.get("/users", (req,res,next)=>{
   //if the user searched for is in the database
   if(fromDatabase.getIDByUsername(req.query.user)){
     //render the user's page
-    res.render("ViewUsers",{"someUser":allUsers[req.query.user], "name": req.query.user});
+    let recommend = allUsers[fromDatabase.getIDByUsername(req.query.user)].reviews;
+    if(recommend){
+      let someArr = []
+      let flag = true;
+      Object.keys(recommend).forEach(function(id){
+        if(recommend[id].score >= 7){
+          someArr.push([movieDatabase[fromDatabase.getIDByTitle(id)].data.Title, parseInt(movieDatabase[fromDatabase.getIDByTitle(id)].data.imdbRating)])
+          flag = false;
+        }
+      });
+      if(flag){
+        Object.keys(movieDatabase).forEach(function(id){
+          someArr.push([movieDatabase[id].data.Title, parseInt(movieDatabase[id].data.imdbRating)])
+        });
+      }
+
+      //sory the 2d array by year, in descending order
+      someArr.sort(function(x,y){
+        return y[1] - x[1];
+      });
+      recommend = [];
+      if(someArr.length <= 100){
+        for(let i = 0; i < someArr.length; i++){
+          for(let j = 0; j < (10/someArr.length); j++){
+            recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.recommended[j]);
+          }
+        }
+      }else{
+        for(let i = 0; i < 10; i++){
+          recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.Title);
+        }
+      }
+    }
+    res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(req.query.user)], "name": fromDatabase.getIDByUsername(req.query.user)});
   }else{
     next(); //call next and get all user's that match the search criteria
   }
@@ -289,7 +305,7 @@ app.get("/users", (req,res,next)=>{
     res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": "All Users"});
   }else{
     //render all search matches
-    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": req.query.user});
+    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": fromDatabase.getIDByUsername(req.query.user)});
   }
 });
 
@@ -301,7 +317,43 @@ app.get("/findMaxPageUser?", (req,res) =>{
 
 //this function redirects the user to the user page
 app.get("/userPage", auth ,(req,res)=>{
-  res.render("ViewUsers",{"someUser":allUsers[req.session.username], "name": req.session.username});
+  //render the user's page
+  let recommend = allUsers[fromDatabase.getIDByUsername(req.session.username)].reviews;
+  flag = true;
+  if(recommend){
+    let someArr = []
+    Object.keys(recommend).forEach(function(id){
+      if(recommend[id].score >= 7){
+        someArr.push([movieDatabase[fromDatabase.getIDByTitle(id)].data.Title, parseInt(movieDatabase[fromDatabase.getIDByTitle(id)].data.imdbRating)])
+        flag = false;
+      }
+
+    });
+    if(flag){
+      Object.keys(movieDatabase).forEach(function(id){
+        someArr.push([movieDatabase[id].data.Title, parseInt(movieDatabase[id].data.imdbRating)])
+      });
+    }
+
+    //sory the 2d array by year, in descending order
+    someArr.sort(function(x,y){
+      return y[1] - x[1];
+    });
+    recommend = [];
+    if(someArr.length <= 100){
+      for(let i = 0; i < someArr.length; i++){
+        for(let j = 0; j < (10/someArr.length); j++){
+          recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.recommended[j]);
+        }
+      }
+    }else{
+      for(let i = 0; i < 10; i++){
+        recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.Title);
+      }
+    }
+  }
+
+  res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[req.session.username], "name": req.session.username});
 });
 
 //this function redirects the user to the login page
@@ -474,6 +526,7 @@ app.post("/addMovie:auto",auth,(req, res)=>{
     let addedMovieId = fromDatabase.getIDByTitle(fromDatabase.randomMoiveTitles[randomTitleIndex]);
     movieDatabase[addedMovieId].data.Genre = fromDatabase.randomGenres[randomGenreIndex];
     movieDatabase[addedMovieId].data.Runtime = Math.floor(Math.random()*360 + 120) + " min"
+    console.log(movieDatabase[addedMovieId].data.Title)
   }
   res.send();
 });
@@ -490,35 +543,46 @@ app.post("/addMovie",(req, res)=>{
     summary = req.body.summary;
     runtime = req.body.runtime;
     genre = req.body.genre;
-    //try to add the movie to the database. If it can be added (all valid entries)
-    if(fromDatabase.createMovie(title, writer, director, actor, movieDatabase, peopleDatabase, allUsers)){
-      //don't forget to set the year, runtime, and genre
-      if(parseInt(year)){
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = year;
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Year = year;
-      }else{
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
-      }
-      if(parseInt(runtime)){
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = runtime + " min";
-      }else{
-        movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = "";
 
-      }
-      movieDatabase[fromDatabase.getIDByTitle(title)].data.Genre = genre;
-      movieDatabase[fromDatabase.getIDByTitle(title)].data.Plot = summary;
-      res.send();
-    }else{
-      if(fromDatabase.getIDByTitle(title)){
-        //if the movie already exists send the correct error code
-        res.status(451).send();
+    if(req.session.loggedIn){
+      if(!allUsers[req.session.username].contributing){
+        res.status(453).send();
       }else{
-        //the user must have entered someone who wasn't in the database, send the
-        //appropriate error code
-        res.status(452).send();
+
+        //try to add the movie to the database. If it can be added (all valid entries)
+        if(fromDatabase.createMovie(title, writer, director, actor, movieDatabase, peopleDatabase, allUsers)){
+          //don't forget to set the year, runtime, and genre
+          if(parseInt(year)){
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = year;
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Year = year;
+          }else{
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Released = "";
+          }
+          if(parseInt(runtime)){
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = runtime + " min";
+          }else{
+            movieDatabase[fromDatabase.getIDByTitle(title)].data.Runtime = "";
+
+          }
+          movieDatabase[fromDatabase.getIDByTitle(title)].data.Genre = genre;
+          movieDatabase[fromDatabase.getIDByTitle(title)].data.Plot = summary;
+          res.send();
+        }else{
+          if(fromDatabase.getIDByTitle(title)){
+            //if the movie already exists send the correct error code
+            res.status(451).send();
+          }else{
+            //the user must have entered someone who wasn't in the database, send the
+            //appropriate error code
+            res.status(452).send();
+          }
+        }
       }
+    }else{
+      res.status(453).send();
     }
+
 });
 
 //toggle wether or not the client calling this route follows the person
@@ -547,3 +611,4 @@ app.get("/followUnfollowUser", (req, res) =>{
 app.listen(port, ()=>{
   console.log("Currently Listening at http:/localHost: " + port)
 });
+//fromDatabase.populateReviews();

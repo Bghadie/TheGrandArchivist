@@ -116,7 +116,7 @@ function getSimilarMovies(){
     }
   }
 
-  let queryString = "/recommendMovieGeneral?info=" + title+","+year;
+  let queryString = "/recommendMovieGeneral?info=" + title;
   request.open("GET",queryString);
   request.setRequestHeader('Content-Type',"text/html")
   request.send();

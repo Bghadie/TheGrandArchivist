@@ -13,9 +13,10 @@ script#script(src='../content/userFunctionality.js' onload='init()' defer='')
 #recommended
   h2 Recommended Movies
   ul
-  if(someUser.recommendedMovies.length > 0)
-    for movies of someUser.recommendedMovies
-      a(href="#", onclick ='javascript:findMovie(this)' name = movies)#link !{movies}
+  if(recommendedMovies)
+    for movies of recommendedMovies
+      ul: a(href="#", onclick ='javascript:findMovie(this)' name = movies)#link !{movies}
+
 
 #usersfollowing
   h2 Users Followed

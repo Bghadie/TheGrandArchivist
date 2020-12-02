@@ -9,21 +9,28 @@ h1{
   float: right;
   flex: 0 1 100%;
 }
+#addSearchCriteria{
+  display: flex;
+  float: right;
+  flex: 0 1 20%;
+  height: 33px;
+}
 body{
   background-color: #dbcbab;
-  max-width: 700px;
+  min-width: 670px;
+  max-width: 900px;
   width: 95%
   margin: 10px auto;
 }
-#logIn:hover, #search:hover, #searchCriteria:hover, #addMovie:hover, #addPerson:hover{
+#logIn:hover, #search:hover, #searchCriteria:hover, #addMovie:hover, #addPerson:hover, #addSearchCriteria:hover{
   background-color: RGB(237,134,150);
 }
-#logIn:active, #search:active,#addMovie:active, #addPerson:active{
+#logIn:active, #search:active,#addMovie:active, #addPerson:active, #addSearchCriteria:active{
   background-color: RGB(237,134,150);
   box-shadow: 0 2px #666;
   transform: translateY(4px);
 }
-#addMovie:disabled, #addPerson:disabled{
+#addMovie:disabled, #addPerson:disabled,#addSearchCriteria:disabled{
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #666666;
@@ -53,7 +60,7 @@ img{
 
 }
 .searchBar{
-  width: 95%;
+  width: 77%;
   float: left;
 }
 #search{
