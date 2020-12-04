@@ -698,7 +698,7 @@ Returns: a subset of all the matched users as an array
 */
 function findSimilarUsers(userToSearch, pageNum){
   let userMatchs = []; //set placehoder array
-  if(userToSearch === ""){ //if the search criteria is empty
+  if(userToSearch === "" || !userToSearch){ //if the search criteria is empty
     Object.keys(userDatabase).forEach(function(id){
       userMatchs.push(id); //consider every user a match
     });

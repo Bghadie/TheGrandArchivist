@@ -66,7 +66,15 @@ app.get("/", (req, res) => {
 app.get("/movies:id", (req, res) =>{
   let id = parseInt(req.params.id.substring(1)); //get the ID the user searched for
   if(fromDatabase.isValidId(id, 1,movieDatabase)){ //check if its a valid ID
-    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+    res.format({
+      "application/json": function(){res.status(200).json({"someMovie":movieDatabase[id].data})},
+      "text/html": function(){
+                    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+       },
+       default: function(){
+                    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+       }
+    });
   }
 });
 
@@ -89,7 +97,15 @@ app.get("/movies", (req, res, next) =>{
     let movie = fromDatabase.getIDByTitle(req.query.title); //basically a flag variable
     //if the movie is in the database, render it
     if(movie){
-      res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+      res.format({
+        "application/json": function(){res.status(200).json({"someMovie":movieDatabase[movie].data})},
+        "text/html": function(){
+                          res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+         },
+         default: function(){
+                          res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+         }
+      });
     }else{
       if(req.query.title === ""){
         //set the search criteria to all movies
@@ -159,9 +175,19 @@ app.get("/movies", (req, res, next) =>{
   //displayed movied will vary based on the page number being shown
   let finalMatches = fromDatabase.findMoviePerPage(res.locals.allMatches, res.locals.pageNum)
   //render the list of movies
-  res.render("ViewMovieList",{"someMovies":finalMatches,
-              "searchCriteria": res.locals.searchCriteria,
-              maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
+  res.format({
+    "application/json": function(){res.status(200).json({"someMovies":finalMatches})},
+    "text/html": function(){
+                      res.render("ViewMovieList",{"someMovies":finalMatches,
+                      "searchCriteria": res.locals.searchCriteria,
+                      maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
+                  },
+      default: function(){
+                      res.render("ViewMovieList",{"someMovies":finalMatches,
+                      "searchCriteria": res.locals.searchCriteria,
+                      maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
+      }
+  });
 });
 
 
@@ -176,7 +202,14 @@ app.get("/people", (req,res,next)=>{
     let profession = peopleDatabase[id].profession; //get their profession
     let sortAllCollabs = fromDatabase.sortArray(fromDatabase.findCoworker(allWork, queryName,movieDatabase)); //sort their collaboration by most frequent
     //render the page
-    res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
+    res.format({
+      "application/json": function(){res.status(200).json({"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})},
+      "text/html": function(){
+                        res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})},
+       default: function(){
+                        res.render("ViewPerson",{"allWorks":allWork, "personsName":queryName, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})
+       }
+    });
   }else{
     next();//the person doesn't exist in the database, call next
   }
@@ -186,12 +219,26 @@ app.get("/people", (req,res)=>{
   let pageNum = req.query.pageNum;//get the current page number (0 by default)
   if(queryName === ""){//if the user entered nothing, all people in the database should match.
     //render all matching people
-    res.render("ViewPeople",{"somePeople":fromDatabase.allPeople(pageNum, peopleDatabase), "searchCriteria": "Everybody"});
+    res.format({
+      "application/json": function(){res.status(200).json({"somePeople":fromDatabase.allPeople(pageNum, peopleDatabase), "searchCriteria": "Everybody"})},
+      "text/html": function(){
+                        res.render("ViewPeople",{"somePeople":fromDatabase.allPeople(pageNum, peopleDatabase), "searchCriteria": "Everybody"})},
+       default: function(){
+                        res.render("ViewPeople",{"somePeople":fromDatabase.allPeople(pageNum, peopleDatabase), "searchCriteria": "Everybody"})
+       }
+    });
   }else{
     //get a list of all people that match the search criteria
     let listOfPeople = fromDatabase.findSimilarPeople(queryName, parseInt(pageNum), peopleDatabase);
     //render all matching people
-    res.render("ViewPeople",{"somePeople":listOfPeople, "searchCriteria": queryName});
+    res.format({
+      "application/json": function(){res.status(200).json({"somePeople":listOfPeople, "searchCriteria": queryName})},
+      "text/html": function(){
+                        res.render("ViewPeople",{"somePeople":listOfPeople, "searchCriteria": queryName})},
+       default: function(){
+                        res.render("ViewPeople",{"somePeople":listOfPeople, "searchCriteria": queryName})
+       }
+    });
   }
 });
 //this function searchs for a person by a given ID
@@ -202,7 +249,14 @@ app.get("/people:id", (req,res)=>{
     let allWork = fromDatabase.findWork(peopleDatabase[id].name.trim(),peopleDatabase) //get all their work and sort it by most recent
     let sortAllCollabs = fromDatabase.sortArray(fromDatabase.findCoworker(allWork, peopleDatabase[id].name,movieDatabase)); //sort their collaboration by most frequent
     //render the page
-    res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs});
+    res.format({
+      "application/json": function(){res.status(200).json({"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})},
+      "text/html": function(){
+                        res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})},
+       default: function(){
+                        res.render("ViewPerson",{"allWorks":allWork, "personsName":peopleDatabase[id].name, "personsProfession":peopleDatabase[id].profession, "collaberations":sortAllCollabs})
+       }
+    });
   }
 });
 
@@ -256,12 +310,11 @@ app.post("/createAccount", (req, res) =>{
   }
 });
 
-//this function handles clients searching for users
-app.get("/users", (req,res,next)=>{
-  //if the user searched for is in the database
-  if(fromDatabase.getIDByUsername(req.query.user)){
-    //render the user's page
-    let recommend = allUsers[fromDatabase.getIDByUsername(req.query.user)].reviews;
+//this function searchs for a user by a given ID
+app.get("/users:id", (req, res) =>{
+  let user = req.params.id.substring(1)
+  if(fromDatabase.isValidId(user, 3)){ //check if its a valid ID
+    let recommend = allUsers[fromDatabase.getIDByUsername(user)].reviews;
     if(recommend){
       let someArr = []
       let flag = true;
@@ -294,18 +347,92 @@ app.get("/users", (req,res,next)=>{
         }
       }
     }
-    res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(req.query.user)], "name": fromDatabase.getIDByUsername(req.query.user)});
-  }else{
-    next(); //call next and get all user's that match the search criteria
+    res.format({
+      "application/json": function(){res.status(200).json({"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(user)], "name": fromDatabase.getIDByUsername(user)})},
+      "text/html": function(){
+                        res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(user)], "name": fromDatabase.getIDByUsername(user)})},
+       default: function(){
+                        res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(user)], "name": fromDatabase.getIDByUsername(user)})
+       }
+    });
   }
+});
+
+//this function handles clients searching for users
+app.get("/users", (req,res,next)=>{
+  //if the user searched for is in the database
+  if(req.query.user){
+    if(fromDatabase.getIDByUsername(req.query.user)){
+      let recommend = allUsers[fromDatabase.getIDByUsername(req.query.user)].reviews;
+      if(recommend){
+        let someArr = []
+        let flag = true;
+        Object.keys(recommend).forEach(function(id){
+          if(recommend[id].score >= 7){
+            someArr.push([movieDatabase[fromDatabase.getIDByTitle(id)].data.Title, parseInt(movieDatabase[fromDatabase.getIDByTitle(id)].data.imdbRating)])
+            flag = false;
+          }
+        });
+        if(flag){
+          Object.keys(movieDatabase).forEach(function(id){
+            someArr.push([movieDatabase[id].data.Title, parseInt(movieDatabase[id].data.imdbRating)])
+          });
+        }
+
+        //sory the 2d array by year, in descending order
+        someArr.sort(function(x,y){
+          return y[1] - x[1];
+        });
+        recommend = [];
+        if(someArr.length <= 100){
+          for(let i = 0; i < someArr.length; i++){
+            for(let j = 0; j < (10/someArr.length); j++){
+              recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.recommended[j]);
+            }
+          }
+        }else{
+          for(let i = 0; i < 10; i++){
+            recommend.push(movieDatabase[fromDatabase.getIDByTitle(someArr[i][0])].data.Title);
+          }
+        }
+      }
+      res.format({
+        "application/json": function(){res.status(200).json({"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(req.query.user)], "name": fromDatabase.getIDByUsername(req.query.user)})},
+        "text/html": function(){
+                          res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(req.query.user)], "name": fromDatabase.getIDByUsername(req.query.user)})},
+         default: function(){
+                          res.render("ViewUsers",{"recommendedMovies":recommend, "someUser":allUsers[fromDatabase.getIDByUsername(req.query.user)], "name": fromDatabase.getIDByUsername(req.query.user)})
+         }
+      });
+    }else{
+      next(); //call next and get all user's that match the search criteria
+    }
+  }else{
+    next();
+  }
+
 }, (req, res) =>{
   //get all matches to the search criteria
   let similarUsers = fromDatabase.findSimilarUsers(req.query.user,parseInt(req.query.pageNum));
-  if(req.query.user === ""){//all usernames should match so render everyons
-    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": "All Users"});
+  if(req.query.user === "" || !req.query.user){//all usernames should match so render everyons
+    res.format({
+      "application/json": function(){res.status(200).json({"someUser":similarUsers, "searchCriteria": "All Users"})},
+      "text/html": function(){
+                        res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": "All Users"})},
+       default: function(){
+                        res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": "All Users"})
+       }
+    });
   }else{
     //render all search matches
-    res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": fromDatabase.getIDByUsername(req.query.user)});
+    res.format({
+      "application/json": function(){res.status(200).json({"someUser":similarUsers, "searchCriteria": fromDatabase.getIDByUsername(req.query.user)})},
+      "text/html": function(){
+                        res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": fromDatabase.getIDByUsername(req.query.user)})},
+       default: function(){
+                        res.render("ViewSimilarUsers",{"someUser":similarUsers, "searchCriteria": fromDatabase.getIDByUsername(req.query.user)})
+       }
+    });
   }
 });
 
