@@ -55,12 +55,12 @@ html(lang = 'en')
       input(type="submit",id="addReview", value="Add Review Button")
     #row3
     .reviews
-      for key of Object.keys(someMovie.review)
+      for key of Object.keys(reviews)
         ul.firstList
           li: a(href="#", onclick ='findUser(this)' name = key) !{key}
           ul.secondList
-            li <u><b>Score</b></u>: !{someMovie.review[key].score}
-            li <u><b>Summary</b></u>: !{someMovie.review[key].summary}
-            li <u><b>Review</b></u>: !{someMovie.review[key].review}
+            li <u><b>Score</b></u>: !{reviews[key].score}
+            li <u><b>Summary</b></u>: !{reviews[key].summary}
+            li <u><b>Review</b></u>: !{reviews[key].review}
     #row4
       p <a id="backToSearch" href="http://localhost:3000/">Back to Search</a>

@@ -2,7 +2,7 @@ function init(){
   //check if the user is logged in
   checkLoggedIn();
   chechContributingUser();//check if they are a contributing user
-  var queryString =" "
+  var queryString ="?"
 
   //get all buttons and search bars
   let searchBar = document.getElementById("searchBar");

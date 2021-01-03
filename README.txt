@@ -28,6 +28,7 @@ Running & Testing:
 		command line and open up http://localhost:3000/ in 
 		google chrome. 
 
+	•	
 
 	•	To help streamline testing I've set up to users in the 
 		database:
@@ -56,13 +57,19 @@ Running & Testing:
 			console log the title of any movie you added 
 			this way so you can search the title. Also, if you 
 			want to test the "add a new person to the 
-			database", add yourself to "Toy Story".
+			database", add "Terry Crews" to "Toy Story".
 	
 		•	To test a multi parametric search, go to the home page, select the search criteria you 
 			would like (i.e., Title, Genre, Mini-rating, Year) then enter something into the search 
 			bar. Do not press "search", instead, press "Add Search Criteria". You have now filtered 
 			you search. You can do this for any combination of the remaining search criteria. Once 
 			you have build your search, press the search button. 
+
+		•	I suggest reading my final report (if possible) prior to testing the functionality of my 
+			project. I did my best to organize it in such a way that it describes each functionality 
+			and its implementation. So basically as you read you can follow along and test the 
+			functionalities in my database.
+
 
 List of HTML/CSS/Pug/JS Files:
 
@@ -97,7 +104,7 @@ List of HTML/CSS/Pug/JS Files:
 	•	ViewLoginpage.pug
 
 	•	ReccMovieGen.pug (this is actually only part of a 
-		webpage, the part with all similar movies, that is 
+		webpage, the part that displays all similar movies, that is 
 		rendered after a user navigates to a specific movie. 
 		Stands for Recommend Movie General)
 

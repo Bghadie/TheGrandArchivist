@@ -10,10 +10,10 @@ for key of someMovies
   if(movies < 50)
     #container
       divpic
-        img#poster(src= key.data.Poster alt='Some Movie Poster' onclick ='javascript:findMovie(this)' name = key.data.Title)
+        img#poster(src= key.Poster alt='Some Movie Poster' onclick ='javascript:findMovie(this)' name = key.Title)
       #container2
-        a(href="#", onclick ='javascript:findMovie(this)' name = key.data.Title)#title !{key.data.Title}
-        p#summary !{key.data.Plot}
+        a(href="#", onclick ='javascript:findMovie(this)' name = key.Title)#title !{key.Title}
+        p#summary !{key.Plot}
   - movies++
 #PrevNext
   a(href="#", onclick ='javascript:prevPageMovie(this)' name = previous)#previous Previous

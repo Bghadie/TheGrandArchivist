@@ -6,6 +6,7 @@ const pug = require("pug");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const fromDatabase = require("./content/buisnessLogic");
+const mongoose = require("mongoose");
 //set the port
 const port = 3000;
 
@@ -16,10 +17,28 @@ const peopleDatabase = require("./content/peopleDatabase");
 const movieDatabase = require("./content/movieDatabase");
 const allUsers = require("./content/userDatabase");
 
-fromDatabase.addReview("IllumaDaddy", "Toy Story", {score:10, review:"YAY"});
-fromDatabase.addReview("IlluaDaddy", "Toy Story", {score:10, review:"YAY"});
-fromDatabase.addReview("IllumaDaddy", "Coraline", {score:10, review:"I have watched this movie A LOT"});
-fromDatabase.addReview("JoestInTime", "Toy Story", {score:7, review:"I have watched this movie A LOT. Tom Hanks was great in it but I stil can't freaking stand Tim Allen, the god damn snitch"});
+let movieSchema = mongoose.Schema({
+  Title: {type: String,required:true},
+  Year: {type: String,required:true},
+  Rated: {type: String,required:true},
+  Released: {type: String,required:true},
+  Runtime: {type: String,required:true},
+  Genre: {type: String,required:true},
+  Director: {type: String,required:true},
+  Writer: {type: String,required:true},
+  Actors: {type: String,required:true},
+  Plot: {type: String,required:true},
+  Poster: {type: String,required:true},
+  Ratings: {type: Array,required:true},
+  Metascore: {type: String,required:true},
+  imdbRating: {type: String,required:true},
+  review: {type: String,required:true},
+  id: {type: Number,required:true},
+  recommended: {type: Array,required:true},
+});
+
+let movieModel = mongoose.model("movies", movieSchema);
+
 
 function auth(req,res,next){
   if(!req.session.loggedIn){
@@ -67,12 +86,21 @@ app.get("/movies:id", (req, res) =>{
   let id = parseInt(req.params.id.substring(1)); //get the ID the user searched for
   if(fromDatabase.isValidId(id, 1,movieDatabase)){ //check if its a valid ID
     res.format({
-      "application/json": function(){res.status(200).json({"someMovie":movieDatabase[id].data})},
+      "application/json": function(){
+        movieModel.findOne({"id": id}, function(err, result){
+          result.review = JSON.parse(result.review);
+          res.status(200).json("ViewMovie",{"someMovie":result, "reviews":JSON.parse(result.review)});
+        })
+      },
       "text/html": function(){
-                    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
-       },
+                    movieModel.findOne({"id": id}, function(err, result){
+                      res.render("ViewMovie",{"someMovie":result, "reviews":JSON.parse(result.review)});
+                    })
+     },
        default: function(){
-                    res.render("ViewMovie",{"someMovie":movieDatabase[id].data});
+                     movieModel.findOne({"id": id}, function(err, result){
+                       res.render("ViewMovie",{"someMovie":result, "reviews":JSON.parse(result.review)});
+                      })
        }
     });
   }
@@ -90,30 +118,36 @@ Then it renders an array that contains all the movies that meet the search param
 */
 app.get("/movies", (req, res, next) =>{
   //the initial search result includes all movies
-  let moviesByTitle = movieDatabase;
+  let moviesByTitle = {};
+  let movie = false;
   res.locals.searchCriteria = "" //initial search criteria
   //if the user is seraching by movie title
   if(req.query.title || req.query.title ===""){
-    let movie = fromDatabase.getIDByTitle(req.query.title); //basically a flag variable
     //if the movie is in the database, render it
+    movieModel.findOne({"Title": req.query.title.trim()}, function(err, result){
+      movie = true;
+     })
     if(movie){
       res.format({
         "application/json": function(){res.status(200).json({"someMovie":movieDatabase[movie].data})},
         "text/html": function(){
-                          res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+          movieModel.findOne({"Title": req.query.title.trim()}, function(err, result){
+            res.render("ViewMovie",{"someMovie":result, "reviews":JSON.parse(result.review)});
+           })
+
          },
          default: function(){
-                          res.render("ViewMovie",{"someMovie":movieDatabase[movie].data});
+           movieModel.findOne({"Title": req.query.title.trim()}, function(err, result){
+             res.render("ViewMovie",{"someMovie":result, "reviews":JSON.parse(result.review)});
+            })
          }
       });
     }else{
       if(req.query.title === ""){
-        //set the search criteria to all movies
-        moviesByTitle = movieDatabase;
         res.locals.searchCriteria += "Any movie " //set the appropriate search criteria
       }else{
         //get all movies that match the search criteria
-        moviesByTitle = fromDatabase.findSimilarMovies(req.query.title.toUpperCase());
+        moviesByTitle["Title"] = {$regex: req.query.title.trim(), $options:"i"};
         //set the search criteria to the search criteria
         res.locals.searchCriteria +=  " '" + req.query.title + "' "
       }
@@ -126,23 +160,20 @@ app.get("/movies", (req, res, next) =>{
   }else{
     //the user didn't search for a title
     //the response.locals is how I intend to pass the matched search criteria across
-    //retquests
+    //requests
     res.locals.allMatches = moviesByTitle;
     res.locals.pageNum = parseInt(req.query.pageNum);
     next(); //call next
   }
 }, (req,res,next) =>{
-  let listOfMovies;
   //if the client is looking for a genre
   if(req.query.genre || req.query.genre === ""){
     //if the user entered nothing, all movies match
     if(req.query.genre === ""){
-      listOfMovies = res.locals.allMatches;
       res.locals.searchCriteria += " Any genre "
     }else{
       //get all genres that match the search criteria
-      listOfMovies = fromDatabase.findGenres(req.query.genre.toUpperCase(), res.locals.allMatches);
-      res.locals.allMatches = listOfMovies;
+      res.locals.allMatches["Genre"] = {$regex: req.query.genre.trim(), $options:"i"};
       res.locals.searchCriteria += " '" + req.query.genre + "' "
     }
   }
@@ -151,41 +182,56 @@ app.get("/movies", (req, res, next) =>{
   let matchedMovies;
   //if the client is looking for a year
   if(req.query.year || req.query.year === ""){
-    let criteria = parseInt(req.query.year);//store the minimum year they want
-    //get all movies that match the search criteria
-    matchedMovies = fromDatabase.getMoviesByYear(criteria, res.locals.allMatches);
-    res.locals.allMatches = matchedMovies[0];
+    res.locals.allMatches["Year"] = {$regex: req.query.year.trim(), $options:"i"};
     res.locals.searchCriteria += matchedMovies[1]
   }
   next(); //check the final search criteria
 },(req,res) =>{
   let threshold = parseFloat(req.query.rating); //get the threshold
-  //if the threshold is valid
-  if(threshold >=0){
-    //get all movies who's average rating are at or above the threshold
-    let matchedMovies = fromDatabase.getListOfReviews(threshold, res.locals.allMatches);
-    res.locals.allMatches = matchedMovies;
-    res.locals.searchCriteria += " rating of " + threshold;
-  }else{
-    res.locals.searchCriteria += " Any rating";
-  }
+
   //get an array of movies to render
   //Because only a certain amount of movies (max 50) will be listed on the page, this fucntion
   //will get the "next 50" movies to be rendered. "Next" is a reference to the fact that the
   //displayed movied will vary based on the page number being shown
   let finalMatches = fromDatabase.findMoviePerPage(res.locals.allMatches, res.locals.pageNum)
+
+
+
+  //if the threshold is valid
+  let count;
+  if(threshold >=0){
+    res.locals.allMatches["imdbRating"] = {$gte: req.query.rating};
+    res.locals.searchCriteria += " rating of " + threshold;
+  }else{
+    res.locals.searchCriteria += " Any rating";
+  }
+
   //render the list of movies
   res.format({
     "application/json": function(){res.status(200).json({"someMovies":finalMatches})},
     "text/html": function(){
-                      res.render("ViewMovieList",{"someMovies":finalMatches,
-                      "searchCriteria": res.locals.searchCriteria,
-                      maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
-                  },
+      movieModel.find(res.locals.allMatches, function(err, result){
+        movieModel.count(result, function(err, count){
+          let numberOfItemsPerPage = 50;
+          let start = ((parseInt(res.locals.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+          let final = Object.values(result).splice(start,50);
+          console.log(final)
+          res.render("ViewMovieList",{"someMovies":final, "searchCriteria": res.locals.searchCriteria,
+              maxPage:Math.floor(count/50)});
+        });
+       })
+     },
       default: function(){
-                      res.render("ViewMovieList",{"someMovies":finalMatches,
-                      "searchCriteria": res.locals.searchCriteria,
-                      maxPage:Math.floor(Object.keys(res.locals.allMatches).length/50)});
+        movieModel.find(res.locals.allMatches, function(err, result){
+          movieModel.count(result, function(err, count){
+            let numberOfItemsPerPage = 50;
+            let start = ((parseInt(res.locals.pageNum)+1) * numberOfItemsPerPage) - (numberOfItemsPerPage);
+            let final = Object.values(result).splice(start,50);
+            console.log(final)
+            res.render("ViewMovieList",{"someMovies":final, "searchCriteria": res.locals.searchCriteria,
+                maxPage:Math.floor(count/50)});
+          });
+         })
       }
   });
 });
@@ -734,8 +780,16 @@ app.get("/followUnfollowUser", (req, res) =>{
   res.send();
 });
 
-//listen at the appropriate port
-app.listen(port, ()=>{
-  console.log("Currently Listening at http:/localHost: " + port)
+mongoose.connect("mongodb://localhost:27017/Movies", {useNewURLParser:true});
+let db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "Error connecting to Mongoose"));
+
+//when we connect to our database
+db.once("open", function(){
+
+      // Server runs if app connects to database
+      app.listen(port, () => {
+          console.log("Server running at http://127.0.0.1:3000/")
+      })
 });
-//fromDatabase.populateReviews();
